@@ -17,17 +17,19 @@ Mobile-first, komplett clientseitig, offline nutzbar – kein Backend, kein Kont
 
 ## Punktewertung
 
-Verwendet wird die übliche Stiche-Raten-Formel, **nur der Bonus ist von 10 auf 5 reduziert**:
+Verwendet wird die Standardvariante von Stiche-Raten, **nur der Bonus ist von 10 auf 5 reduziert**:
 
 | Fall | Punkte |
 | --- | --- |
-| Ansage getroffen | **5 Bonuspunkte + 1 Punkt je gewonnenem Stich** |
-| Ansage verfehlt | **−1 Punkt je Stich Abweichung** (negative Gesamtpunkte möglich) |
+| Jeder gewonnene Stich | **1 Punkt** |
+| Ansage getroffen | **zusätzlich 5 Bonuspunkte** |
+| Ansage verfehlt | **nur der Bonus entfällt – kein Punktabzug** |
 
 Beispiele: Ansage 3 / 3 Stiche → `5 + 3 = 8` Punkte · Ansage 0 / 0 Stiche → `5` Punkte ·
-Ansage 1 / 4 Stiche → `−3` Punkte.
+Ansage 1 / 4 Stiche → `4` Punkte · Ansage 2 / 0 Stiche → `0` Punkte.
 
-Die Bonuspunkte sind bewusst fest im Code hinterlegt (`src/lib/rules.js`) und nicht konfigurierbar.
+Punkte werden nie abgezogen, der Punktestand kann also nicht sinken. Die Bonuspunkte sind
+bewusst fest im Code hinterlegt (`src/lib/rules.js`) und nicht konfigurierbar.
 Trumpffarben werden nicht erfasst.
 
 ## Tech-Stack

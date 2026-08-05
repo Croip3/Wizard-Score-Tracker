@@ -18,11 +18,19 @@ describe('calculatePoints', () => {
     expect(calculatePoints(10, 10)).toBe(15)
   })
 
-  it('zieht bei verfehlter Ansage einen Punkt je Stich Abweichung ab', () => {
-    expect(calculatePoints(0, 1)).toBe(-1)
-    expect(calculatePoints(3, 1)).toBe(-2)
-    expect(calculatePoints(1, 4)).toBe(-3)
-    expect(calculatePoints(5, 0)).toBe(-5)
+  it('wertet bei verfehlter Ansage nur die gewonnenen Stiche, ohne Bonus', () => {
+    expect(calculatePoints(0, 1)).toBe(1)
+    expect(calculatePoints(3, 1)).toBe(1)
+    expect(calculatePoints(1, 4)).toBe(4)
+    expect(calculatePoints(5, 0)).toBe(0)
+  })
+
+  it('zieht nie Punkte ab', () => {
+    for (let bid = 0; bid <= 10; bid++) {
+      for (let tricksWon = 0; tricksWon <= 10; tricksWon++) {
+        expect(calculatePoints(bid, tricksWon)).toBeGreaterThanOrEqual(0)
+      }
+    }
   })
 
   it('weist ungültige Eingaben zurück', () => {
@@ -97,7 +105,7 @@ describe('Beispielrunde', () => {
       { bid: 0, tricksWon: 1 }
     ]
     const points = round.map((entry) => calculatePoints(entry.bid, entry.tricksWon))
-    expect(points).toEqual([7, -1, 6, -1])
+    expect(points).toEqual([7, 0, 6, 1])
     expect(round.reduce((sum, entry) => sum + entry.tricksWon, 0)).toBe(4)
   })
 })

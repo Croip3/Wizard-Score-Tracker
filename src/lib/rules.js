@@ -1,10 +1,11 @@
 /**
  * Spielregeln für "Stiche Raten" (Wizard-Variante).
  *
- * Wertung (Standardformel, nur der Bonus ist von 10 auf 5 abgeändert):
- *   - Ansage getroffen: 5 Bonuspunkte + 1 Punkt pro gewonnenem Stich
- *   - Ansage verfehlt:  1 Minuspunkt pro Stich Differenz zwischen Ansage
- *                       und tatsächlich gewonnenen Stichen
+ * Wertung (Standardvariante, nur der Bonus ist von 10 auf 5 abgeändert):
+ *   - Jeder gewonnene Stich zählt 1 Punkt.
+ *   - Wer seine Ansage trifft, bekommt zusätzlich 5 Bonuspunkte.
+ *   - Wer seine Ansage verfehlt, verliert nur den Bonus – Punktabzug gibt es
+ *     nicht, der Punktestand kann also nie negativ werden.
  *
  * Die Bonuspunkte sind bewusst fest codiert – sie sind nicht konfigurierbar.
  */
@@ -12,11 +13,8 @@
 /** Fester Bonus für eine korrekt angesagte Stichzahl. */
 export const BONUS_POINTS = 5
 
-/** Punkte pro gewonnenem Stich bei getroffener Ansage. */
+/** Punkte pro gewonnenem Stich. */
 export const POINTS_PER_TRICK = 1
-
-/** Minuspunkte pro Stich Abweichung bei verfehlter Ansage. */
-export const PENALTY_PER_TRICK_OFF = 1
 
 /** Maximale Anzahl Spieler pro Spiel. */
 export const MAX_PLAYERS = 6
@@ -32,7 +30,7 @@ export const MAX_CARDS_PER_ROUND = 30
  *
  * @param {number} bid Angesagte Stiche
  * @param {number} tricksWon Tatsächlich gewonnene Stiche
- * @returns {number} Rundenpunkte (kann negativ sein)
+ * @returns {number} Rundenpunkte (nie negativ)
  */
 export function calculatePoints(bid, tricksWon) {
   if (!Number.isInteger(bid) || !Number.isInteger(tricksWon)) {
@@ -42,10 +40,8 @@ export function calculatePoints(bid, tricksWon) {
     throw new RangeError('Ansage und Stiche dürfen nicht negativ sein.')
   }
 
-  if (bid === tricksWon) {
-    return BONUS_POINTS + tricksWon * POINTS_PER_TRICK
-  }
-  return -Math.abs(bid - tricksWon) * PENALTY_PER_TRICK_OFF
+  const trickPoints = tricksWon * POINTS_PER_TRICK
+  return bid === tricksWon ? BONUS_POINTS + trickPoints : trickPoints
 }
 
 /**

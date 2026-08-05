@@ -65,10 +65,7 @@ const remainderText = computed(() => {
             <div class="player-name">{{ row.player.name }}</div>
             <div class="text-body-secondary small text-nowrap">
               Ansage <strong>{{ row.bid }}</strong> ·
-              <span
-                :class="row.preview >= 0 ? 'points-positive' : 'points-negative'"
-                title="Punkte für diese Runde"
-              >
+              <span :class="{ 'points-positive': row.preview > 0 }" title="Punkte für diese Runde">
                 {{ row.preview > 0 ? '+' : '' }}{{ row.preview }} Pkt
               </span>
             </div>

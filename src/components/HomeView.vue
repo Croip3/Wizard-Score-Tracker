@@ -59,8 +59,9 @@ function confirmNewGame() {
       <div class="card-body">
         <h2 class="h6 card-title">So wird gewertet</h2>
         <ul class="mb-0 ps-3 text-body-secondary">
-          <li>Ansage getroffen: <strong>{{ BONUS_POINTS }} Bonuspunkte</strong> + 1 Punkt je Stich</li>
-          <li>Ansage verfehlt: <strong>−1 Punkt</strong> je Stich Abweichung</li>
+          <li>Jeder gewonnene Stich zählt <strong>1 Punkt</strong></li>
+          <li>Ansage getroffen: zusätzlich <strong>{{ BONUS_POINTS }} Bonuspunkte</strong></li>
+          <li>Ansage verfehlt: nur der Bonus entfällt – <strong>kein Punktabzug</strong></li>
           <li>Bis zu {{ MAX_PLAYERS }} Spieler, beliebig viele Runden</li>
           <li>Kartenanzahl pro Runde frei wählbar, der Geber rotiert automatisch</li>
         </ul>
