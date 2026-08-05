@@ -6,7 +6,9 @@ import {
   buildStandings,
   calculatePoints,
   dealerForRound,
-  determineWinners
+  determineWinners,
+  nextCardCount,
+  startingCardCount
 } from '../lib/rules.js'
 
 /**
@@ -138,7 +140,7 @@ async function startGame(names) {
     state.players = players
     state.rounds = []
     state.runningGameId = game.id
-    await addRound(1, 1)
+    await addRound(1, startingCardCount(players.length))
     goTo('game')
   } catch (error) {
     reportError(error)
@@ -305,9 +307,8 @@ async function completeRound() {
     round.completedAt = completedAt
     await repo.updateRound(round.id, { phase: RoundPhase.DONE, completedAt })
 
-    // Übliche Voreinstellung: eine Karte mehr als in der Vorrunde.
-    const nextCardCount = clamp(round.cardCount + 1, 1, MAX_CARDS_PER_ROUND)
-    await addRound(round.roundNumber + 1, nextCardCount)
+    // Es wird heruntergezählt: eine Karte weniger als in der Vorrunde.
+    await addRound(round.roundNumber + 1, nextCardCount(round.cardCount))
     state.error = null
     return true
   } catch (error) {

@@ -6,7 +6,7 @@ Mobile-first, komplett clientseitig, offline nutzbar – kein Backend, kein Kont
 ## Funktionen
 
 - **Spielerverwaltung**: 2–6 Spieler, freie Namen, Sitzreihenfolge per ↑/↓ anpassbar, Schnellauswahl bereits bekannter Spieler
-- **Rundenablauf**: Kartenanzahl pro Runde frei einstellbar (steigend, fallend oder wieder von vorn), Ansage-Phase und Stich-Phase getrennt
+- **Rundenablauf**: die Kartenanzahl zählt je Runde um eine Karte herunter und bleibt dabei in jeder Runde frei anpassbar (auch wieder hoch oder von vorn), Ansage-Phase und Stich-Phase getrennt
 - **Dealer-Rotation**: der Geber wandert automatisch reihum; angesagt wird links vom Geber, der Geber ist zuletzt dran
 - **Schnelle Eingabe**: alle Zahlen über +/− Stepper, keine Tastatur nötig; Stiche zusätzlich per Reset-Button (einzeln oder für alle) auf 0
 - **Sinnvolle Grenzen**: Ansage und Stiche liegen immer zwischen 0 und der Kartenanzahl der Runde; eine Runde lässt sich erst abschließen, wenn genau so viele Stiche verteilt sind, wie Karten ausgegeben wurden

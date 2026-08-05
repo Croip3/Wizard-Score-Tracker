@@ -1,12 +1,15 @@
 import { describe, expect, it } from 'vitest'
 import {
   BONUS_POINTS,
+  MAX_CARDS_PER_ROUND,
   biddingOrder,
   buildStandings,
   calculatePoints,
   dealerForRound,
   dealerIndexForRound,
-  determineWinners
+  determineWinners,
+  nextCardCount,
+  startingCardCount
 } from '../src/lib/rules.js'
 
 describe('calculatePoints', () => {
@@ -62,6 +65,33 @@ describe('Dealer-Rotation', () => {
   it('lässt links vom Geber ansagen, der Geber ist zuletzt dran', () => {
     expect(biddingOrder(players, 1).map((player) => player.name)).toEqual(['Ben', 'Cem', 'Anna'])
     expect(biddingOrder(players, 2).map((player) => player.name)).toEqual(['Cem', 'Anna', 'Ben'])
+  })
+})
+
+describe('Kartenanzahl je Runde', () => {
+  it('startet mit so vielen Karten, wie sich gleichmäßig austeilen lassen', () => {
+    expect(startingCardCount(3)).toBe(20)
+    expect(startingCardCount(4)).toBe(15)
+    expect(startingCardCount(5)).toBe(12)
+    expect(startingCardCount(6)).toBe(10)
+  })
+
+  it('bleibt innerhalb der erlaubten Kartenanzahl', () => {
+    expect(startingCardCount(2)).toBeLessThanOrEqual(MAX_CARDS_PER_ROUND)
+    expect(startingCardCount(60)).toBe(1)
+    expect(() => startingCardCount(0)).toThrow(RangeError)
+  })
+
+  it('zählt Runde für Runde herunter und stoppt bei einer Karte', () => {
+    expect(nextCardCount(10)).toBe(9)
+    expect(nextCardCount(2)).toBe(1)
+    expect(nextCardCount(1)).toBe(1)
+  })
+
+  it('ergibt eine absteigende Rundenfolge', () => {
+    const counts = [startingCardCount(4)]
+    for (let round = 1; round < 5; round++) counts.push(nextCardCount(counts.at(-1)))
+    expect(counts).toEqual([15, 14, 13, 12, 11])
   })
 })
 
