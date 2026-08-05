@@ -64,14 +64,14 @@ const remainderText = computed(() => {
         <div class="player-row">
           <div class="player-info">
             <div class="player-name">{{ row.player.name }}</div>
-            <div class="text-body-secondary small text-nowrap">
+            <div class="text-body-secondary small">
               Ansage <strong>{{ row.bid }}</strong> ·
               <span :class="{ 'points-positive': row.preview > 0 }" title="Punkte für diese Runde">
-                {{ row.preview > 0 ? '+' : '' }}{{ row.preview }} Pkt
+                {{ row.preview > 0 ? '+' : '' }}{{ row.preview }} P
               </span>
             </div>
           </div>
-          <div class="d-flex align-items-center gap-2 ms-auto">
+          <div class="d-flex align-items-center gap-2">
             <NumberStepper
               :model-value="row.tricksWon"
               :min="0"
@@ -82,13 +82,13 @@ const remainderText = computed(() => {
             />
             <button
               type="button"
-              class="btn btn-sm btn-outline-secondary"
+              class="btn btn-outline-secondary stepper-side-btn"
               :disabled="row.tricksWon === 0"
               :aria-label="`Stiche von ${row.player.name} zurücksetzen`"
               title="Auf 0 zurücksetzen"
               @click="resetTricks(row.player.id)"
             >
-              ⟲ 0
+              ⟲
             </button>
           </div>
         </div>

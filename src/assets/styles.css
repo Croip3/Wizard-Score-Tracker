@@ -53,10 +53,15 @@ body {
   padding-bottom: calc(6rem + env(safe-area-inset-bottom));
 }
 
-/* Alle Tipp-/Stich-Buttons: große Trefferfläche, kein Doppeltipp-Zoom. */
+/* Alle Tipp-/Stich-Buttons: Trefferfläche von mindestens 48 px, damit sie
+   sich während des Spiels bequem mit dem Daumen bedienen lassen. */
 .stepper .btn {
   touch-action: manipulation;
-  min-width: 3rem;
+  min-width: 3.25rem;
+  min-height: 3rem;
+  font-size: 1.4rem;
+  line-height: 1;
+  padding-inline: 0.5rem;
   font-variant-numeric: tabular-nums;
 }
 
@@ -65,17 +70,29 @@ body {
   text-align: center;
   font-variant-numeric: tabular-nums;
   font-weight: 600;
+  font-size: 1.35rem;
 }
 
 .stepper-lg .btn {
-  min-width: 3.25rem;
-  font-size: 1.35rem;
-  line-height: 1.1;
+  min-width: 4rem;
+  min-height: 3.5rem;
+  font-size: 1.6rem;
 }
 
 .stepper-lg .stepper-value {
-  min-width: 3.5rem;
-  font-size: 1.5rem;
+  min-width: 4rem;
+  font-size: 1.75rem;
+}
+
+/* Reset-Button neben dem Stepper: gleiche Höhe, aber schmal, damit die
+   Namensspalte genug Platz behält. */
+.stepper-side-btn {
+  min-width: 2.75rem;
+  min-height: 3rem;
+  font-size: 1.25rem;
+  line-height: 1;
+  padding-inline: 0.5rem;
+  touch-action: manipulation;
 }
 
 .player-row {
