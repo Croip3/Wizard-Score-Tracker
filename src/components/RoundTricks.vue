@@ -30,15 +30,16 @@ const entries = computed(() => {
   })
 })
 
-const canComplete = computed(() => tricksRemaining.value === 0)
+const matchesCardCount = computed(() => tricksRemaining.value === 0)
 
 const tricksWord = (count) => (Math.abs(count) === 1 ? 'Stich' : 'Stiche')
 
+/** Reiner Hinweis – die Summe darf von der Kartenanzahl abweichen. */
 const remainderText = computed(() => {
   const remaining = tricksRemaining.value
   if (remaining === 0) return 'Alle Stiche verteilt'
-  if (remaining > 0) return `Noch ${remaining} ${tricksWord(remaining)} zu verteilen`
-  return `${Math.abs(remaining)} ${tricksWord(remaining)} zu viel eingetragen`
+  if (remaining > 0) return `${remaining} ${tricksWord(remaining)} weniger als Karten`
+  return `${Math.abs(remaining)} ${tricksWord(remaining)} mehr als Karten`
 })
 </script>
 
@@ -95,7 +96,7 @@ const remainderText = computed(() => {
     </ul>
 
     <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
-      <span class="badge" :class="canComplete ? 'text-bg-success' : 'text-bg-warning'">
+      <span class="badge" :class="matchesCardCount ? 'text-bg-success' : 'text-bg-secondary'">
         {{ trickTotal }} / {{ currentRound.cardCount }} Stiche
       </span>
       <span class="text-body-secondary flex-grow-1">{{ remainderText }}</span>
@@ -114,12 +115,7 @@ const remainderText = computed(() => {
         <button type="button" class="btn btn-outline-secondary" @click="backToBidding">
           Ansagen
         </button>
-        <button
-          type="button"
-          class="btn btn-success btn-lg flex-grow-1"
-          :disabled="!canComplete"
-          @click="completeRound"
-        >
+        <button type="button" class="btn btn-success btn-lg flex-grow-1" @click="completeRound">
           Runde abschließen
         </button>
       </div>

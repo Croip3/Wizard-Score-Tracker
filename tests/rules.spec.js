@@ -69,7 +69,7 @@ describe('Dealer-Rotation', () => {
 })
 
 describe('Kartenanzahl je Runde', () => {
-  it('startet mit so vielen Karten, wie sich gleichmäßig austeilen lassen', () => {
+  it('schlägt so viele Startkarten vor, wie sich gleichmäßig austeilen lassen', () => {
     expect(startingCardCount(3)).toBe(20)
     expect(startingCardCount(4)).toBe(15)
     expect(startingCardCount(5)).toBe(12)

@@ -7,8 +7,7 @@ import {
   calculatePoints,
   dealerForRound,
   determineWinners,
-  nextCardCount,
-  startingCardCount
+  nextCardCount
 } from '../lib/rules.js'
 
 /**
@@ -130,8 +129,9 @@ function goTo(view) {
  * Neues Spiel starten.
  *
  * @param {string[]} names Spielernamen in Sitzreihenfolge
+ * @param {number} firstRoundCardCount Karten in der ersten Runde
  */
-async function startGame(names) {
+async function startGame(names, firstRoundCardCount) {
   try {
     await closeRunningGames()
     const players = await repo.ensurePlayers(names)
@@ -140,7 +140,7 @@ async function startGame(names) {
     state.players = players
     state.rounds = []
     state.runningGameId = game.id
-    await addRound(1, startingCardCount(players.length))
+    await addRound(1, clamp(Math.round(firstRoundCardCount), 1, MAX_CARDS_PER_ROUND))
     goTo('game')
   } catch (error) {
     reportError(error)
@@ -285,15 +285,12 @@ async function backToBidding() {
 
 /**
  * Runde abschließen: Punkte berechnen, speichern und die nächste Runde
- * vorbereiten. Die Summe der Stiche muss der Kartenanzahl entsprechen.
+ * vorbereiten. Die Summe der Stiche darf von der Kartenanzahl abweichen –
+ * sie kann kleiner oder größer sein.
  */
 async function completeRound() {
   const round = currentRound.value
   if (!round) return false
-  if (trickTotal.value !== round.cardCount) {
-    state.error = `Es müssen genau ${round.cardCount} Stiche verteilt werden.`
-    return false
-  }
 
   try {
     const updates = round.entries.map((entry) => {
