@@ -9,7 +9,8 @@ Mobile-first, komplett clientseitig, offline nutzbar – kein Backend, kein Kont
 - **Rundenablauf**: Runde 1 startet mit 6 Karten pro Spieler (beim Spielstart per Stepper änderbar) und zählt danach je Runde um eine Karte herunter – in jeder Runde frei anpassbar (auch wieder hoch oder von vorn), Ansage-Phase und Stich-Phase getrennt
 - **Dealer-Rotation**: der Geber wandert automatisch reihum; angesagt wird links vom Geber, der Geber ist zuletzt dran
 - **Schnelle Eingabe**: alle Zahlen über +/− Stepper, keine Tastatur nötig; Stiche zusätzlich per Reset-Button (einzeln oder für alle) auf 0
-- **Sinnvolle Grenzen**: Ansage und Stiche liegen je Spieler immer zwischen 0 und der Kartenanzahl der Runde. Die Summe der Stiche darf von der Kartenanzahl abweichen (mehr oder weniger) – die App zeigt die Abweichung nur als Hinweis an und blockiert den Rundenabschluss nicht
+- **Zwangsverfehlung**: die Summe der Ansagen darf nicht genau der Kartenanzahl entsprechen – mindestens ein Spieler muss danebenliegen. Passt es genau, wird die Anzeige rot und der Wechsel in die Stich-Phase ist gesperrt
+- **Sinnvolle Grenzen**: Ansage und Stiche liegen je Spieler immer zwischen 0 und der Kartenanzahl der Runde. Die Summe der Stiche darf dagegen von der Kartenanzahl abweichen (mehr oder weniger) – die App zeigt die Abweichung nur als Hinweis an und blockiert den Rundenabschluss nicht
 - **Punkteübersicht**: Tabelle mit einer Zeile pro Runde und einer Spalte pro Spieler, inklusive Gesamtstand und Platzierung
 - **Spielende jederzeit**: manuell beendbar, danach Auswertung mit Gewinner, Endstand, Trefferquote und Rundenübersicht
 - **Statistiken**: alle Spiele bleiben lokal gespeichert – Siege, Punkte, Ø pro Spiel und Trefferquote je Spieler

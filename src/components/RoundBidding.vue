@@ -1,7 +1,7 @@
 <script setup>
 import { computed } from 'vue'
 import NumberStepper from './NumberStepper.vue'
-import { MAX_CARDS_PER_ROUND, biddingOrder } from '../lib/rules.js'
+import { MAX_CARDS_PER_ROUND, biddingOrder, bidsAreAllowed } from '../lib/rules.js'
 import { useGame } from '../store/gameStore.js'
 
 const { state, currentRound, currentDealer, bidTotal, setCardCount, setBid, confirmBids } = useGame()
@@ -17,11 +17,18 @@ function bidOf(playerId) {
 
 const bidDifference = computed(() => bidTotal.value - (currentRound.value?.cardCount ?? 0))
 
+/** Die Summe der Ansagen darf nicht genau der Kartenanzahl entsprechen. */
+const bidsAllowed = computed(() =>
+  currentRound.value ? bidsAreAllowed(bidTotal.value, currentRound.value.cardCount) : true
+)
+
 const bidSummary = computed(() => {
-  if (bidDifference.value === 0) return { text: 'genau angesagt', variant: 'text-bg-secondary' }
-  if (bidDifference.value > 0)
-    return { text: `${bidDifference.value} zu viel angesagt`, variant: 'text-bg-warning' }
-  return { text: `${Math.abs(bidDifference.value)} zu wenig angesagt`, variant: 'text-bg-info' }
+  const difference = bidDifference.value
+  if (difference === 0) {
+    return { text: 'nicht erlaubt – muss abweichen', variant: 'text-bg-danger' }
+  }
+  if (difference > 0) return { text: `${difference} mehr als Karten`, variant: 'text-bg-secondary' }
+  return { text: `${Math.abs(difference)} weniger als Karten`, variant: 'text-bg-secondary' }
 })
 </script>
 
@@ -82,16 +89,25 @@ const bidSummary = computed(() => {
       </li>
     </ul>
 
-    <div class="d-flex align-items-center gap-2 mb-3">
-      <span class="text-body-secondary">
+    <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+      <span :class="bidsAllowed ? 'text-body-secondary' : 'text-danger fw-semibold'">
         Ansagen gesamt: <strong>{{ bidTotal }}</strong> / {{ currentRound.cardCount }}
       </span>
       <span class="badge" :class="bidSummary.variant">{{ bidSummary.text }}</span>
     </div>
+    <p v-if="!bidsAllowed" class="text-danger small mb-3">
+      Die Ansagen dürfen zusammen nicht genau {{ currentRound.cardCount }} ergeben – mindestens ein
+      Spieler muss danebenliegen.
+    </p>
 
     <div class="action-bar">
       <div class="container-narrow">
-        <button type="button" class="btn btn-primary btn-lg w-100" @click="confirmBids">
+        <button
+          type="button"
+          class="btn btn-primary btn-lg w-100"
+          :disabled="!bidsAllowed"
+          @click="confirmBids"
+        >
           Ansagen übernehmen → Stiche eintragen
         </button>
       </div>

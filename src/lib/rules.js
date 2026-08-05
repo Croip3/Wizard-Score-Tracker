@@ -43,6 +43,18 @@ export function nextCardCount(cardCount) {
 }
 
 /**
+ * Die Summe aller Ansagen einer Runde darf nicht genau der Kartenanzahl
+ * entsprechen – mindestens ein Spieler muss seine Ansage verfehlen.
+ * Mehr oder weniger ist beides erlaubt.
+ *
+ * @param {number} bidTotal Summe aller Ansagen
+ * @param {number} cardCount Karten in dieser Runde
+ */
+export function bidsAreAllowed(bidTotal, cardCount) {
+  return bidTotal !== cardCount
+}
+
+/**
  * Punkte eines Spielers für eine Runde.
  *
  * @param {number} bid Angesagte Stiche

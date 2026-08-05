@@ -3,6 +3,7 @@ import { GameStatus, RoundPhase } from '../db/index.js'
 import * as repo from '../db/repository.js'
 import {
   MAX_CARDS_PER_ROUND,
+  bidsAreAllowed,
   buildStandings,
   calculatePoints,
   dealerForRound,
@@ -259,15 +260,26 @@ async function resetAllTricks() {
   }
 }
 
-/** Von der Ansage- in die Stich-Phase wechseln. */
+/**
+ * Von der Ansage- in die Stich-Phase wechseln. Die Summe der Ansagen darf
+ * dabei nicht genau der Kartenanzahl entsprechen.
+ */
 async function confirmBids() {
   const round = currentRound.value
-  if (!round) return
+  if (!round) return false
+  if (!bidsAreAllowed(bidTotal.value, round.cardCount)) {
+    state.error = `Die Ansagen dürfen zusammen nicht genau ${round.cardCount} ergeben.`
+    return false
+  }
+
   round.phase = RoundPhase.TRICKS
   try {
     await repo.updateRound(round.id, { phase: RoundPhase.TRICKS })
+    state.error = null
+    return true
   } catch (error) {
     reportError(error)
+    return false
   }
 }
 

@@ -62,6 +62,9 @@ function confirmNewGame() {
           <li>Jeder gewonnene Stich zählt <strong>1 Punkt</strong></li>
           <li>Ansage getroffen: zusätzlich <strong>{{ BONUS_POINTS }} Bonuspunkte</strong></li>
           <li>Ansage verfehlt: nur der Bonus entfällt – <strong>kein Punktabzug</strong></li>
+          <li>
+            Die Ansagen einer Runde dürfen <strong>nicht</strong> genau die Kartenanzahl ergeben
+          </li>
           <li>Bis zu {{ MAX_PLAYERS }} Spieler, beliebig viele Runden</li>
           <li>Start mit 6 Karten pro Spieler, danach je Runde eine weniger – jederzeit anpassbar</li>
           <li>Der Geber rotiert automatisch reihum</li>

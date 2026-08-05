@@ -4,6 +4,7 @@ import {
   DEFAULT_START_CARD_COUNT,
   MAX_CARDS_PER_ROUND,
   biddingOrder,
+  bidsAreAllowed,
   buildStandings,
   calculatePoints,
   dealerForRound,
@@ -40,6 +41,21 @@ describe('calculatePoints', () => {
     expect(() => calculatePoints(1.5, 1)).toThrow(TypeError)
     expect(() => calculatePoints(-1, 0)).toThrow(RangeError)
     expect(() => calculatePoints(0, -2)).toThrow(RangeError)
+  })
+})
+
+describe('bidsAreAllowed', () => {
+  it('verbietet Ansagen, die genau der Kartenanzahl entsprechen', () => {
+    expect(bidsAreAllowed(6, 6)).toBe(false)
+    expect(bidsAreAllowed(1, 1)).toBe(false)
+    expect(bidsAreAllowed(0, 0)).toBe(false)
+  })
+
+  it('erlaubt Über- und Unteransagen', () => {
+    expect(bidsAreAllowed(7, 6)).toBe(true)
+    expect(bidsAreAllowed(5, 6)).toBe(true)
+    expect(bidsAreAllowed(0, 6)).toBe(true)
+    expect(bidsAreAllowed(12, 6)).toBe(true)
   })
 })
 
