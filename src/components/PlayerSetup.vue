@@ -1,8 +1,13 @@
 <script setup>
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import NumberStepper from './NumberStepper.vue'
 import { listKnownPlayers } from '../db/repository.js'
-import { MAX_CARDS_PER_ROUND, MAX_PLAYERS, MIN_PLAYERS, startingCardCount } from '../lib/rules.js'
+import {
+  DEFAULT_START_CARD_COUNT,
+  MAX_CARDS_PER_ROUND,
+  MAX_PLAYERS,
+  MIN_PLAYERS
+} from '../lib/rules.js'
 import { useGame } from '../store/gameStore.js'
 
 const { startGame, goTo } = useGame()
@@ -12,24 +17,7 @@ const draft = ref('')
 const hint = ref('')
 const knownPlayers = ref([])
 const starting = ref(false)
-const startCards = ref(10)
-const startCardsTouched = ref(false)
-
-// Solange der Wert nicht von Hand gesetzt wurde, folgt er der Spielerzahl:
-// so viele Karten, wie sich aus einem 60-Karten-Deck austeilen lassen.
-watch(
-  () => names.value.length,
-  (playerCount) => {
-    if (!startCardsTouched.value && playerCount >= MIN_PLAYERS) {
-      startCards.value = startingCardCount(playerCount)
-    }
-  }
-)
-
-function setStartCards(value) {
-  startCardsTouched.value = true
-  startCards.value = value
-}
+const startCards = ref(DEFAULT_START_CARD_COUNT)
 
 const isFull = computed(() => names.value.length >= MAX_PLAYERS)
 const canStart = computed(() => names.value.length >= MIN_PLAYERS && !starting.value)
@@ -172,13 +160,12 @@ async function onStart() {
         <label class="form-label fw-semibold" for="start-cards">Karten in Runde 1</label>
         <div class="d-flex align-items-center gap-3" id="start-cards">
           <NumberStepper
-            :model-value="startCards"
+            v-model="startCards"
             :min="1"
             :max="MAX_CARDS_PER_ROUND"
             large
             label="Karten in Runde 1"
             variant="outline-primary"
-            @update:model-value="setStartCards"
           />
           <span class="text-body-secondary">
             {{ startCards === 1 ? 'Karte' : 'Karten' }} pro Spieler

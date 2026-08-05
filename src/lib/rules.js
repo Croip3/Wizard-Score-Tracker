@@ -25,23 +25,12 @@ export const MIN_PLAYERS = 2
 /** Obergrenze für die Kartenanzahl einer Runde (bewusst großzügig gewählt). */
 export const MAX_CARDS_PER_ROUND = 30
 
-/** Kartenanzahl eines üblichen Wizard-Decks. */
-export const DECK_SIZE = 60
-
 /**
- * Kartenanzahl der ersten Runde: so viele Karten, wie sich gleichmäßig
- * austeilen lassen. Von dort wird Runde für Runde heruntergezählt.
- * Der Wert ist nur ein Vorschlag und lässt sich in jeder Runde anpassen.
- *
- * @param {number} playerCount Anzahl Spieler
+ * Karten pro Spieler in der ersten Runde. Von hier wird Runde für Runde
+ * heruntergezählt; der Wert lässt sich beim Spielstart und in jeder Runde
+ * von Hand anpassen.
  */
-export function startingCardCount(playerCount) {
-  if (!Number.isInteger(playerCount) || playerCount < 1) {
-    throw new RangeError('Es muss mindestens einen Spieler geben.')
-  }
-  const perPlayer = Math.floor(DECK_SIZE / playerCount)
-  return Math.min(Math.max(perPlayer, 1), MAX_CARDS_PER_ROUND)
-}
+export const DEFAULT_START_CARD_COUNT = 6
 
 /**
  * Kartenanzahl der Folgerunde: eine Karte weniger als in der Vorrunde,

@@ -63,7 +63,7 @@ function confirmNewGame() {
           <li>Ansage getroffen: zusätzlich <strong>{{ BONUS_POINTS }} Bonuspunkte</strong></li>
           <li>Ansage verfehlt: nur der Bonus entfällt – <strong>kein Punktabzug</strong></li>
           <li>Bis zu {{ MAX_PLAYERS }} Spieler, beliebig viele Runden</li>
-          <li>Kartenanzahl wird je Runde heruntergezählt und bleibt frei anpassbar</li>
+          <li>Start mit 6 Karten pro Spieler, danach je Runde eine weniger – jederzeit anpassbar</li>
           <li>Der Geber rotiert automatisch reihum</li>
         </ul>
       </div>
