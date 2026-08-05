@@ -1,0 +1,103 @@
+import { describe, expect, it } from 'vitest'
+import {
+  BONUS_POINTS,
+  biddingOrder,
+  buildStandings,
+  calculatePoints,
+  dealerForRound,
+  dealerIndexForRound,
+  determineWinners
+} from '../src/lib/rules.js'
+
+describe('calculatePoints', () => {
+  it('gibt bei getroffener Ansage 5 Bonuspunkte plus einen Punkt je Stich', () => {
+    expect(BONUS_POINTS).toBe(5)
+    expect(calculatePoints(0, 0)).toBe(5)
+    expect(calculatePoints(1, 1)).toBe(6)
+    expect(calculatePoints(3, 3)).toBe(8)
+    expect(calculatePoints(10, 10)).toBe(15)
+  })
+
+  it('zieht bei verfehlter Ansage einen Punkt je Stich Abweichung ab', () => {
+    expect(calculatePoints(0, 1)).toBe(-1)
+    expect(calculatePoints(3, 1)).toBe(-2)
+    expect(calculatePoints(1, 4)).toBe(-3)
+    expect(calculatePoints(5, 0)).toBe(-5)
+  })
+
+  it('weist ungültige Eingaben zurück', () => {
+    expect(() => calculatePoints(1.5, 1)).toThrow(TypeError)
+    expect(() => calculatePoints(-1, 0)).toThrow(RangeError)
+    expect(() => calculatePoints(0, -2)).toThrow(RangeError)
+  })
+})
+
+describe('Dealer-Rotation', () => {
+  const players = [
+    { id: 1, name: 'Anna' },
+    { id: 2, name: 'Ben' },
+    { id: 3, name: 'Cem' }
+  ]
+
+  it('startet beim ersten Spieler und rotiert reihum', () => {
+    expect(dealerIndexForRound(1, 3)).toBe(0)
+    expect(dealerIndexForRound(2, 3)).toBe(1)
+    expect(dealerIndexForRound(3, 3)).toBe(2)
+    expect(dealerIndexForRound(4, 3)).toBe(0)
+  })
+
+  it('liefert den passenden Spieler', () => {
+    expect(dealerForRound(players, 1).name).toBe('Anna')
+    expect(dealerForRound(players, 5).name).toBe('Ben')
+  })
+
+  it('lässt links vom Geber ansagen, der Geber ist zuletzt dran', () => {
+    expect(biddingOrder(players, 1).map((player) => player.name)).toEqual(['Ben', 'Cem', 'Anna'])
+    expect(biddingOrder(players, 2).map((player) => player.name)).toEqual(['Cem', 'Anna', 'Ben'])
+  })
+})
+
+describe('Endstand', () => {
+  const players = [
+    { id: 1, name: 'Anna' },
+    { id: 2, name: 'Ben' },
+    { id: 3, name: 'Cem' }
+  ]
+
+  it('sortiert nach Punkten und vergibt bei Gleichstand denselben Platz', () => {
+    const standings = buildStandings(players, { 1: 12, 2: 12, 3: -3 })
+    expect(standings.map((entry) => [entry.player.name, entry.rank])).toEqual([
+      ['Anna', 1],
+      ['Ben', 1],
+      ['Cem', 3]
+    ])
+  })
+
+  it('behandelt fehlende Punktestände als 0', () => {
+    const standings = buildStandings(players, { 1: 4 })
+    expect(standings.map((entry) => entry.total)).toEqual([4, 0, 0])
+  })
+
+  it('meldet bei Punktgleichheit mehrere Gewinner', () => {
+    expect(determineWinners(players, { 1: 9, 2: 9, 3: 1 }).map((p) => p.name)).toEqual([
+      'Anna',
+      'Ben'
+    ])
+    expect(determineWinners(players, { 1: 9, 2: 3, 3: 1 }).map((p) => p.name)).toEqual(['Anna'])
+  })
+})
+
+describe('Beispielrunde', () => {
+  it('rechnet eine komplette Runde korrekt ab', () => {
+    // 4 Karten, Ansagen 2/1/1/0, tatsächlich 2/0/1/1
+    const round = [
+      { bid: 2, tricksWon: 2 },
+      { bid: 1, tricksWon: 0 },
+      { bid: 1, tricksWon: 1 },
+      { bid: 0, tricksWon: 1 }
+    ]
+    const points = round.map((entry) => calculatePoints(entry.bid, entry.tricksWon))
+    expect(points).toEqual([7, -1, 6, -1])
+    expect(round.reduce((sum, entry) => sum + entry.tricksWon, 0)).toBe(4)
+  })
+})
