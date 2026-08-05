@@ -1,5 +1,5 @@
 /**
- * Spielregeln für "Stiche Raten" (Wizard-Variante).
+ * Spielregeln für Wizard in der Hausvariante "Stiche Raten".
  *
  * Wertung (Standardvariante, nur der Bonus ist von 10 auf 5 abgeändert):
  *   - Jeder gewonnene Stich zählt 1 Punkt.

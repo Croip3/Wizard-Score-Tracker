@@ -5,7 +5,6 @@ import GameView from './components/GameView.vue'
 import HomeView from './components/HomeView.vue'
 import PlayerSetup from './components/PlayerSetup.vue'
 import StatsView from './components/StatsView.vue'
-import { GameStatus, RoundPhase } from './db/index.js'
 import { useGame } from './store/gameStore.js'
 
 const { state, init, goTo } = useGame()
@@ -24,21 +23,13 @@ const currentView = computed(() => views[state.view] ?? HomeView)
 
 /** Aus dem laufenden Spiel heraus kann man kurz auf die Startseite wechseln. */
 const showHomeButton = computed(() => state.view === 'game')
-
-const headerSubtitle = computed(() => {
-  if (state.view === 'game' && state.game?.status === GameStatus.RUNNING) {
-    return `${state.rounds.filter((round) => round.phase === RoundPhase.DONE).length + 1}. Runde`
-  }
-  return ''
-})
 </script>
 
 <template>
   <header class="app-header">
     <div class="container-narrow d-flex align-items-center gap-2 py-2">
-      <span class="fs-5 fw-semibold flex-grow-1">
-        Stiche Raten
-        <small v-if="headerSubtitle" class="ms-1 opacity-75 fw-normal">{{ headerSubtitle }}</small>
+      <span class="app-title fw-semibold flex-grow-1">
+        WIZARD <span class="fw-normal opacity-75">- F&amp;E Version</span>
       </span>
       <button
         v-if="showHomeButton"

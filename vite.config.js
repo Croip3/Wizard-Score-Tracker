@@ -17,10 +17,10 @@ export default defineConfig({
       includeAssets: ['favicon.svg', 'favicon-64x64.png', 'apple-touch-icon.png'],
       manifest: {
         id: base,
-        name: 'Stiche Raten – Punkte Tracker',
-        short_name: 'Stiche Raten',
+        name: 'WIZARD - F&E Version',
+        short_name: 'WIZARD F&E',
         description:
-          'Punkte-Tracker für das Kartenspiel Stiche Raten: Ansagen, Stiche und Punktestand – komplett offline.',
+          'Punkte-Tracker für das Kartenspiel Wizard: Ansagen, Stiche und Punktestand – komplett offline.',
         lang: 'de',
         dir: 'ltr',
         start_url: base,

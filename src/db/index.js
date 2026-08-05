@@ -11,6 +11,8 @@ import Dexie from 'dexie'
  * `gameId` liegt zusätzlich auf roundEntries, damit die Statistik alle
  * Einträge eines Spiels ohne Umweg über die Runden laden kann.
  */
+// Der Datenbankname bleibt bewusst unverändert, damit Spiele aus älteren
+// Versionen der App erhalten bleiben.
 export const db = new Dexie('stiche-raten')
 
 db.version(1).stores({

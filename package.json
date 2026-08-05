@@ -2,7 +2,7 @@
   "name": "wizard-score-tracker",
   "version": "1.0.0",
   "private": true,
-  "description": "Progressive Web App zum Punkte-Tracking für das Kartenspiel Stiche Raten",
+  "description": "WIZARD - F&E Version: Progressive Web App zum Punkte-Tracking für das Kartenspiel Wizard",
   "type": "module",
   "scripts": {
     "dev": "vite",

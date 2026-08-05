@@ -1,6 +1,6 @@
-# Stiche Raten – Punkte Tracker
+# WIZARD - F&E Version
 
-Progressive Web App zum Punkte-Tracking für das Kartenspiel **Stiche Raten** (Wizard-Variante).
+Progressive Web App zum Punkte-Tracking für das Kartenspiel **Wizard** bzw. Stiche Raten.
 Mobile-first, komplett clientseitig, offline nutzbar – kein Backend, kein Konto.
 
 ## Funktionen

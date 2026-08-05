@@ -32,8 +32,10 @@ function confirmNewGame() {
 <template>
   <section>
     <div class="text-center mb-4">
-      <h1 class="h3 mb-1">Stiche Raten</h1>
-      <p class="text-body-secondary mb-0">Punkte-Tracker für eure Runde – offline, ohne Konto.</p>
+      <h1 class="h3 mb-1">WIZARD</h1>
+      <p class="text-body-secondary mb-0">
+        F&amp;E Version · Punkte-Tracker für eure Runde – offline, ohne Konto.
+      </p>
     </div>
 
     <div v-if="hasRunningGame" class="card border-primary mb-3">
