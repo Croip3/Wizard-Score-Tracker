@@ -92,6 +92,21 @@ src/
 Jede Eingabe wird sofort geschrieben: Ein Reload oder ein geschlossener Browser-Tab mitten in
 der Runde geht nicht verloren, das laufende Spiel wird beim nächsten Start automatisch fortgesetzt.
 
+## Versionsanzeige
+
+Auf der Startseite steht unten eine Zeile wie `Version 7 · 92625af · 05.08.26, 12:04`:
+
+| Teil | Herkunft |
+| --- | --- |
+| Versionsnummer | `github.run_number` – zählt bei jedem Deploy automatisch hoch, lokal steht `dev` |
+| Commit | kurzer Git-SHA (`GITHUB_SHA`, lokal `git rev-parse`) |
+| Zeitpunkt | Zeit des Builds |
+
+Die Werte werden von Vite über `define` zur Build-Zeit eingesetzt (siehe
+[`vite.config.js`](vite.config.js) und [`src/lib/version.js`](src/lib/version.js)) – zur Laufzeit
+wird nichts abgefragt. So lässt sich auf dem Handy prüfen, ob der Service Worker schon den neuen
+Stand ausliefert.
+
 ## Deployment auf GitHub Pages
 
 Der Workflow [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml) baut und

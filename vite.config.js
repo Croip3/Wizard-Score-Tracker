@@ -1,7 +1,19 @@
+import { execSync } from 'node:child_process'
 import { fileURLToPath, URL } from 'node:url'
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import { VitePWA } from 'vite-plugin-pwa'
+
+// Commit, aus dem dieser Build entstanden ist – wird in der App angezeigt,
+// damit sich prüfen lässt, welcher Stand auf dem Gerät läuft.
+function currentCommit() {
+  if (process.env.GITHUB_SHA) return process.env.GITHUB_SHA.slice(0, 7)
+  try {
+    return execSync('git rev-parse --short=7 HEAD', { encoding: 'utf8' }).trim()
+  } catch {
+    return 'unbekannt'
+  }
+}
 
 // GitHub Pages serves the app from https://<user>.github.io/<repo>/, so every
 // asset URL needs that prefix. The deploy workflow passes the repository name
@@ -10,6 +22,13 @@ const base = process.env.VITE_BASE || '/Wizard-Score-Tracker/'
 
 export default defineConfig({
   base,
+  define: {
+    // GITHUB_RUN_NUMBER zählt pro Workflow automatisch hoch – lokal gibt es
+    // stattdessen "dev".
+    __APP_BUILD_NUMBER__: JSON.stringify(process.env.GITHUB_RUN_NUMBER || 'dev'),
+    __APP_COMMIT__: JSON.stringify(currentCommit()),
+    __APP_BUILD_TIME__: JSON.stringify(new Date().toISOString())
+  },
   plugins: [
     vue(),
     VitePWA({

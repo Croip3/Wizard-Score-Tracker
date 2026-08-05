@@ -34,6 +34,10 @@ jobs:
         env:
           # Basis-Pfad aus dem Repository-Namen ableiten (…github.io/<repo>/).
           VITE_BASE: /${{ github.event.repository.name }}/
+          # Versionsanzeige in der App: die Laufnummer zählt bei jedem Deploy
+          # automatisch hoch, der Commit macht den Stand eindeutig.
+          GITHUB_RUN_NUMBER: ${{ github.run_number }}
+          GITHUB_SHA: ${{ github.sha }}
         run: npm run build
 
       - uses: actions/configure-pages@v5

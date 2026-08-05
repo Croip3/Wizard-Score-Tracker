@@ -2,6 +2,7 @@
 import { computed, ref } from 'vue'
 import ConfirmDialog from './ConfirmDialog.vue'
 import { BONUS_POINTS, MAX_PLAYERS } from '../lib/rules.js'
+import { versionLabel } from '../lib/version.js'
 import { useGame } from '../store/gameStore.js'
 
 const { state, goTo, resumeRunningGame } = useGame()
@@ -73,6 +74,8 @@ function confirmNewGame() {
         </ul>
       </div>
     </div>
+
+    <p class="text-center text-body-secondary small mt-3 mb-0">{{ versionLabel() }}</p>
 
     <ConfirmDialog
       v-if="showNewGameDialog"
