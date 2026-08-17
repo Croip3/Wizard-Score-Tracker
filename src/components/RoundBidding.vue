@@ -8,7 +8,7 @@ const { state, currentRound, currentDealer, bidTotal, setCardCount, setBid, conf
 
 /** Angesagt wird links vom Geber – der Geber ist zuletzt dran. */
 const orderedPlayers = computed(() =>
-  currentRound.value ? biddingOrder(state.players, currentRound.value.roundNumber) : []
+  currentRound.value ? biddingOrder(state.players, currentRound.value.dealerPlayerId) : []
 )
 
 function bidOf(playerId) {
@@ -41,6 +41,9 @@ const bidSummary = computed(() => {
             <h2 class="h5 mb-1">Runde {{ currentRound.roundNumber }} · Ansagen</h2>
             <p class="mb-0 text-body-secondary">
               Geber: <strong>{{ currentDealer?.name ?? '–' }}</strong>
+              <span v-if="currentRound.roundNumber === 1" class="badge text-bg-secondary ms-1">
+                ausgelost
+              </span>
             </p>
           </div>
           <span class="badge text-bg-primary align-self-center">Ansage-Phase</span>

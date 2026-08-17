@@ -70,7 +70,7 @@ function confirmNewGame() {
           </li>
           <li>Bis zu {{ MAX_PLAYERS }} Spieler, beliebig viele Runden</li>
           <li>Start mit 6 Karten pro Spieler, danach je Runde eine weniger – jederzeit anpassbar</li>
-          <li>Der Geber rotiert automatisch reihum</li>
+          <li>Der erste Geber wird ausgelost, danach rotiert er reihum</li>
         </ul>
       </div>
     </div>

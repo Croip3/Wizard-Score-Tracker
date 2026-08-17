@@ -74,17 +74,32 @@ export function calculatePoints(bid, tricksWon) {
 }
 
 /**
- * Index des Gebers in der Sitzreihenfolge. Der Geber rotiert reihum: in Runde 1
- * gibt der erste Spieler der Liste, in Runde 2 der zweite usw.
+ * Losentscheid, wer die erste Runde austeilt.
  *
- * @param {number} roundNumber 1-basierte Rundennummer
  * @param {number} playerCount Anzahl Spieler
+ * @param {() => number} random Zufallsquelle (für Tests austauschbar)
+ * @returns {number} Index in der Sitzreihenfolge
  */
-export function dealerIndexForRound(roundNumber, playerCount) {
+export function pickRandomDealerIndex(playerCount, random = Math.random) {
   if (!Number.isInteger(playerCount) || playerCount < 1) {
     throw new RangeError('Es muss mindestens einen Spieler geben.')
   }
-  return (roundNumber - 1) % playerCount
+  return Math.floor(random() * playerCount) % playerCount
+}
+
+/**
+ * Index des Gebers in der Sitzreihenfolge. Der Geber rotiert reihum, beginnend
+ * beim ausgelosten Spieler der ersten Runde.
+ *
+ * @param {number} roundNumber 1-basierte Rundennummer
+ * @param {number} playerCount Anzahl Spieler
+ * @param {number} firstDealerIndex Geber der ersten Runde
+ */
+export function dealerIndexForRound(roundNumber, playerCount, firstDealerIndex = 0) {
+  if (!Number.isInteger(playerCount) || playerCount < 1) {
+    throw new RangeError('Es muss mindestens einen Spieler geben.')
+  }
+  return (firstDealerIndex + roundNumber - 1) % playerCount
 }
 
 /**
@@ -93,10 +108,11 @@ export function dealerIndexForRound(roundNumber, playerCount) {
  * @template {{ id: number }} P
  * @param {P[]} players Spieler in Sitzreihenfolge
  * @param {number} roundNumber 1-basierte Rundennummer
+ * @param {number} firstDealerIndex Geber der ersten Runde
  * @returns {P}
  */
-export function dealerForRound(players, roundNumber) {
-  return players[dealerIndexForRound(roundNumber, players.length)]
+export function dealerForRound(players, roundNumber, firstDealerIndex = 0) {
+  return players[dealerIndexForRound(roundNumber, players.length, firstDealerIndex)]
 }
 
 /**
@@ -105,12 +121,13 @@ export function dealerForRound(players, roundNumber) {
  *
  * @template {{ id: number }} P
  * @param {P[]} players Spieler in Sitzreihenfolge
- * @param {number} roundNumber 1-basierte Rundennummer
+ * @param {number} dealerPlayerId Geber dieser Runde
  * @returns {P[]}
  */
-export function biddingOrder(players, roundNumber) {
-  const dealerIndex = dealerIndexForRound(roundNumber, players.length)
-  return players.map((_, i) => players[(dealerIndex + 1 + i) % players.length])
+export function biddingOrder(players, dealerPlayerId) {
+  const dealerIndex = players.findIndex((player) => player.id === dealerPlayerId)
+  const firstToBid = dealerIndex === -1 ? 0 : dealerIndex + 1
+  return players.map((_, i) => players[(firstToBid + i) % players.length])
 }
 
 /**

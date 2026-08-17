@@ -10,7 +10,8 @@ import {
   dealerForRound,
   dealerIndexForRound,
   determineWinners,
-  nextCardCount
+  nextCardCount,
+  pickRandomDealerIndex
 } from '../src/lib/rules.js'
 
 describe('calculatePoints', () => {
@@ -66,21 +67,52 @@ describe('Dealer-Rotation', () => {
     { id: 3, name: 'Cem' }
   ]
 
-  it('startet beim ersten Spieler und rotiert reihum', () => {
+  it('rotiert reihum, beginnend beim ausgelosten Geber', () => {
     expect(dealerIndexForRound(1, 3)).toBe(0)
     expect(dealerIndexForRound(2, 3)).toBe(1)
-    expect(dealerIndexForRound(3, 3)).toBe(2)
     expect(dealerIndexForRound(4, 3)).toBe(0)
+
+    expect(dealerIndexForRound(1, 3, 2)).toBe(2)
+    expect(dealerIndexForRound(2, 3, 2)).toBe(0)
+    expect(dealerIndexForRound(3, 3, 2)).toBe(1)
+    expect(dealerIndexForRound(4, 3, 2)).toBe(2)
   })
 
   it('liefert den passenden Spieler', () => {
     expect(dealerForRound(players, 1).name).toBe('Anna')
     expect(dealerForRound(players, 5).name).toBe('Ben')
+    expect(dealerForRound(players, 1, 1).name).toBe('Ben')
+    expect(dealerForRound(players, 3, 1).name).toBe('Anna')
   })
 
   it('lässt links vom Geber ansagen, der Geber ist zuletzt dran', () => {
     expect(biddingOrder(players, 1).map((player) => player.name)).toEqual(['Ben', 'Cem', 'Anna'])
-    expect(biddingOrder(players, 2).map((player) => player.name)).toEqual(['Cem', 'Anna', 'Ben'])
+    expect(biddingOrder(players, 3).map((player) => player.name)).toEqual(['Anna', 'Ben', 'Cem'])
+  })
+
+  it('beginnt bei unbekanntem Geber vorne in der Liste', () => {
+    expect(biddingOrder(players, 999).map((player) => player.name)).toEqual(['Anna', 'Ben', 'Cem'])
+  })
+})
+
+describe('Auslosung des ersten Gebers', () => {
+  it('liefert einen gültigen Index innerhalb der Spielerzahl', () => {
+    expect(pickRandomDealerIndex(4, () => 0)).toBe(0)
+    expect(pickRandomDealerIndex(4, () => 0.5)).toBe(2)
+    // Math.random() liefert nie genau 1, der Randfall darf trotzdem nicht
+    // aus der Liste laufen.
+    expect(pickRandomDealerIndex(4, () => 0.999999)).toBe(3)
+    expect(pickRandomDealerIndex(4, () => 1)).toBe(0)
+  })
+
+  it('kann jeden Spieler treffen', () => {
+    const seen = new Set()
+    for (let i = 0; i < 500; i++) seen.add(pickRandomDealerIndex(6))
+    expect([...seen].sort()).toEqual([0, 1, 2, 3, 4, 5])
+  })
+
+  it('weist ungültige Spielerzahlen zurück', () => {
+    expect(() => pickRandomDealerIndex(0)).toThrow(RangeError)
   })
 })
 

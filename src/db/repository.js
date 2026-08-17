@@ -39,13 +39,19 @@ export async function listKnownPlayers() {
 
 /* ------------------------------------------------------------------- Spiele */
 
-/** Neues Spiel mit fester Sitzreihenfolge anlegen. */
-export async function createGame(playerIds) {
+/**
+ * Neues Spiel mit fester Sitzreihenfolge anlegen.
+ *
+ * @param {number[]} playerIds Spieler in Sitzreihenfolge
+ * @param {number} firstDealerIndex Ausgeloster Geber der ersten Runde
+ */
+export async function createGame(playerIds, firstDealerIndex = 0) {
   const game = {
     startedAt: new Date().toISOString(),
     endedAt: null,
     status: GameStatus.RUNNING,
     playerIds: [...playerIds],
+    firstDealerIndex,
     winnerPlayerIds: []
   }
   game.id = await db.games.add(game)

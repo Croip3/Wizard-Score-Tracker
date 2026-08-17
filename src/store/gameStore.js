@@ -8,7 +8,8 @@ import {
   calculatePoints,
   dealerForRound,
   determineWinners,
-  nextCardCount
+  nextCardCount,
+  pickRandomDealerIndex
 } from '../lib/rules.js'
 
 /**
@@ -136,7 +137,12 @@ async function startGame(names, firstRoundCardCount) {
   try {
     await closeRunningGames()
     const players = await repo.ensurePlayers(names)
-    const game = await repo.createGame(players.map((player) => player.id))
+    // Wer die erste Runde austeilt, wird ausgelost; danach rotiert der Geber.
+    const firstDealerIndex = pickRandomDealerIndex(players.length)
+    const game = await repo.createGame(
+      players.map((player) => player.id),
+      firstDealerIndex
+    )
     state.game = game
     state.players = players
     state.rounds = []
@@ -177,7 +183,9 @@ async function closeRunningGames() {
 }
 
 async function addRound(roundNumber, cardCount) {
-  const dealer = dealerForRound(state.players, roundNumber)
+  // Spiele aus früheren Versionen haben keinen ausgelosten Geber – dort
+  // beginnt weiterhin der erste Spieler der Liste.
+  const dealer = dealerForRound(state.players, roundNumber, state.game.firstDealerIndex ?? 0)
   const round = await repo.createRound({
     gameId: state.game.id,
     roundNumber,
