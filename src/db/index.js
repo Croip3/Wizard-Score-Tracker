@@ -4,7 +4,8 @@ import Dexie from 'dexie'
  * Offline-Datenbank (IndexedDB via Dexie).
  *
  * players      { id, name, nameKey, createdAt }
- * games        { id, startedAt, endedAt, status, playerIds, winnerPlayerIds }
+ * games        { id, startedAt, endedAt, status, mode, playerIds,
+ *                firstDealerIndex, winnerPlayerIds }
  * rounds       { id, gameId, roundNumber, cardCount, dealerPlayerId, phase, completedAt }
  * roundEntries { id, roundId, gameId, playerId, bid, tricksWon, points }
  *

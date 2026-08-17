@@ -1,7 +1,7 @@
 <script setup>
 import { computed, ref } from 'vue'
 import ConfirmDialog from './ConfirmDialog.vue'
-import { BONUS_POINTS, MAX_PLAYERS } from '../lib/rules.js'
+import { GAME_MODES, MAX_PLAYERS } from '../lib/rules.js'
 import { versionLabel } from '../lib/version.js'
 import { useGame } from '../store/gameStore.js'
 
@@ -58,16 +58,26 @@ function confirmNewGame() {
       </button>
     </div>
 
+    <div class="card mb-3">
+      <div class="card-body">
+        <h2 class="h6 card-title">Zwei Spielmodi</h2>
+        <dl class="mb-0 text-body-secondary">
+          <template v-for="gameMode in GAME_MODES" :key="gameMode.id">
+            <dt class="text-body">{{ gameMode.name }}</dt>
+            <dd class="mb-2 small">
+              Getroffen: {{ gameMode.hitRule }}<br />
+              Verfehlt: {{ gameMode.missRule }}<br />
+              <span class="opacity-75">{{ gameMode.extraRule }}</span>
+            </dd>
+          </template>
+        </dl>
+      </div>
+    </div>
+
     <div class="card">
       <div class="card-body">
-        <h2 class="h6 card-title">So wird gewertet</h2>
+        <h2 class="h6 card-title">Für beide Modi gleich</h2>
         <ul class="mb-0 ps-3 text-body-secondary">
-          <li>Jeder gewonnene Stich zählt <strong>1 Punkt</strong></li>
-          <li>Ansage getroffen: zusätzlich <strong>{{ BONUS_POINTS }} Bonuspunkte</strong></li>
-          <li>Ansage verfehlt: nur der Bonus entfällt – <strong>kein Punktabzug</strong></li>
-          <li>
-            Die Ansagen einer Runde dürfen <strong>nicht</strong> genau die Kartenanzahl ergeben
-          </li>
           <li>Bis zu {{ MAX_PLAYERS }} Spieler, beliebig viele Runden</li>
           <li>Start mit 6 Karten pro Spieler, danach je Runde eine weniger – jederzeit anpassbar</li>
           <li>Der erste Geber wird ausgelost, danach rotiert er reihum</li>

@@ -6,6 +6,7 @@ import { useGame } from '../store/gameStore.js'
 
 const {
   state,
+  mode,
   currentRound,
   currentDealer,
   trickTotal,
@@ -25,7 +26,7 @@ const entries = computed(() => {
       player,
       bid: entry?.bid ?? 0,
       tricksWon: entry?.tricksWon ?? 0,
-      preview: calculatePoints(entry?.bid ?? 0, entry?.tricksWon ?? 0)
+      preview: calculatePoints(entry?.bid ?? 0, entry?.tricksWon ?? 0, mode.value)
     }
   })
 })
@@ -66,7 +67,10 @@ const remainderText = computed(() => {
             <div class="player-name">{{ row.player.name }}</div>
             <div class="text-body-secondary small">
               Ansage <strong>{{ row.bid }}</strong> ·
-              <span :class="{ 'points-positive': row.preview > 0 }" title="Punkte für diese Runde">
+              <span
+                :class="row.preview > 0 ? 'points-positive' : row.preview < 0 ? 'points-negative' : ''"
+                title="Punkte für diese Runde"
+              >
                 {{ row.preview > 0 ? '+' : '' }}{{ row.preview }} P
               </span>
             </div>

@@ -9,16 +9,19 @@ Mobile-first, komplett clientseitig, offline nutzbar – kein Backend, kein Kont
 - **Rundenablauf**: Runde 1 startet mit 6 Karten pro Spieler (beim Spielstart per Stepper änderbar) und zählt danach je Runde um eine Karte herunter – in jeder Runde frei anpassbar (auch wieder hoch oder von vorn), Ansage-Phase und Stich-Phase getrennt
 - **Dealer-Rotation**: wer die erste Runde austeilt, wird beim Spielstart zufällig ausgelost; danach wandert der Geber automatisch reihum. Angesagt wird links vom Geber, der Geber ist zuletzt dran
 - **Schnelle Eingabe**: alle Zahlen über +/− Stepper, keine Tastatur nötig; Stiche zusätzlich per Reset-Button (einzeln oder für alle) auf 0
-- **Zwangsverfehlung**: die Summe der Ansagen darf nicht genau der Kartenanzahl entsprechen – mindestens ein Spieler muss danebenliegen. Passt es genau, wird die Anzeige rot und der Wechsel in die Stich-Phase ist gesperrt
+- **Zwei Spielmodi**: „F&E Version" (Hausvariante) und „Classic Wizard" (offizielle Wertung), beim Spielstart wählbar – siehe [Spielmodi und Punktewertung](#spielmodi-und-punktewertung)
+- **Zwangsverfehlung** (nur F&E Version): die Summe der Ansagen darf nicht genau der Kartenanzahl entsprechen – mindestens ein Spieler muss danebenliegen. Passt es genau, wird die Anzeige rot und der Wechsel in die Stich-Phase ist gesperrt
 - **Sinnvolle Grenzen**: Ansage und Stiche liegen je Spieler immer zwischen 0 und der Kartenanzahl der Runde. Die Summe der Stiche darf dagegen von der Kartenanzahl abweichen (mehr oder weniger) – die App zeigt die Abweichung nur als Hinweis an und blockiert den Rundenabschluss nicht
 - **Punkteübersicht**: Tabelle mit einer Zeile pro Runde und einer Spalte pro Spieler, inklusive Gesamtstand und Platzierung
 - **Spielende jederzeit**: manuell beendbar, danach Auswertung mit Gewinner, Endstand, Trefferquote und Rundenübersicht
 - **Statistiken**: alle Spiele bleiben lokal gespeichert – Siege, Punkte, Ø pro Spiel und Trefferquote je Spieler
 - **PWA**: installierbar (Manifest, Icons, Splash Screen), App-Shell wird per Service Worker gecacht und läuft offline
 
-## Punktewertung
+## Spielmodi und Punktewertung
 
-Verwendet wird die Standardvariante von Stiche-Raten, **nur der Bonus ist von 10 auf 5 reduziert**:
+Der Modus wird beim Spielstart gewählt und gilt für das ganze Spiel.
+
+### F&E Version (Hausvariante)
 
 | Fall | Punkte |
 | --- | --- |
@@ -26,12 +29,24 @@ Verwendet wird die Standardvariante von Stiche-Raten, **nur der Bonus ist von 10
 | Ansage getroffen | **zusätzlich 5 Bonuspunkte** |
 | Ansage verfehlt | **nur der Bonus entfällt – kein Punktabzug** |
 
-Beispiele: Ansage 3 / 3 Stiche → `5 + 3 = 8` Punkte · Ansage 0 / 0 Stiche → `5` Punkte ·
-Ansage 1 / 4 Stiche → `4` Punkte · Ansage 2 / 0 Stiche → `0` Punkte.
+Beispiele: 3/3 Stiche → `8` · 0/0 → `5` · Ansage 1 bei 4 Stichen → `4` · Ansage 2 bei 0 Stichen → `0`.
+Punkte werden nie abgezogen, der Punktestand kann also nicht sinken. Zusätzlich gilt hier die
+**Zwangsverfehlung**: die Summe der Ansagen darf nicht genau der Kartenanzahl entsprechen.
 
-Punkte werden nie abgezogen, der Punktestand kann also nicht sinken. Die Bonuspunkte sind
-bewusst fest im Code hinterlegt (`src/lib/rules.js`) und nicht konfigurierbar.
-Trumpffarben werden nicht erfasst.
+### Classic Wizard (offizielle Wertung)
+
+| Fall | Punkte |
+| --- | --- |
+| Ansage getroffen | **20 Punkte + 10 je gewonnenem Stich** |
+| Ansage verfehlt | **−10 Punkte je Stich Abweichung** |
+
+Beispiele: 3/3 Stiche → `50` · 0/0 → `20` · Ansage 1 bei 4 Stichen → `−30` · Ansage 3 bei 1 Stich → `−20`.
+Negative Punktestände sind hier möglich. Ansagen sind frei – die Zwangsverfehlung gilt in diesem
+Modus **nicht**.
+
+Alle Punktwerte sind bewusst fest im Code hinterlegt (`src/lib/rules.js`) und nicht konfigurierbar.
+Trumpffarben werden in keinem Modus erfasst. In der Statistik lassen sich die Spielerwerte pro
+Modus ansehen, da Punkte zwischen den Modi nicht vergleichbar sind.
 
 ## Tech-Stack
 
@@ -85,7 +100,7 @@ src/
 | Tabelle | Felder |
 | --- | --- |
 | `players` | `id`, `name`, `nameKey` (eindeutig, für Wiedererkennung), `createdAt` |
-| `games` | `id`, `startedAt`, `endedAt`, `status` (`running`/`finished`), `playerIds`, `winnerPlayerIds` |
+| `games` | `id`, `startedAt`, `endedAt`, `status` (`running`/`finished`), `mode` (`fe`/`classic`), `playerIds`, `firstDealerIndex`, `winnerPlayerIds` |
 | `rounds` | `id`, `gameId`, `roundNumber`, `cardCount`, `dealerPlayerId`, `phase`, `completedAt` |
 | `roundEntries` | `id`, `roundId`, `gameId`, `playerId`, `bid`, `tricksWon`, `points` |
 

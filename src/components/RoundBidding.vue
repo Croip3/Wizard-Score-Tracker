@@ -4,7 +4,8 @@ import NumberStepper from './NumberStepper.vue'
 import { MAX_CARDS_PER_ROUND, biddingOrder, bidsAreAllowed } from '../lib/rules.js'
 import { useGame } from '../store/gameStore.js'
 
-const { state, currentRound, currentDealer, bidTotal, setCardCount, setBid, confirmBids } = useGame()
+const { state, mode, currentRound, currentDealer, bidTotal, setCardCount, setBid, confirmBids } =
+  useGame()
 
 /** Angesagt wird links vom Geber – der Geber ist zuletzt dran. */
 const orderedPlayers = computed(() =>
@@ -17,15 +18,22 @@ function bidOf(playerId) {
 
 const bidDifference = computed(() => bidTotal.value - (currentRound.value?.cardCount ?? 0))
 
-/** Die Summe der Ansagen darf nicht genau der Kartenanzahl entsprechen. */
+/**
+ * In der F&E Version darf die Summe der Ansagen nicht genau der Kartenanzahl
+ * entsprechen; Classic Wizard kennt diese Einschränkung nicht.
+ */
 const bidsAllowed = computed(() =>
-  currentRound.value ? bidsAreAllowed(bidTotal.value, currentRound.value.cardCount) : true
+  currentRound.value
+    ? bidsAreAllowed(bidTotal.value, currentRound.value.cardCount, mode.value)
+    : true
 )
 
 const bidSummary = computed(() => {
   const difference = bidDifference.value
   if (difference === 0) {
-    return { text: 'nicht erlaubt – muss abweichen', variant: 'text-bg-danger' }
+    return bidsAllowed.value
+      ? { text: 'genau angesagt', variant: 'text-bg-secondary' }
+      : { text: 'nicht erlaubt – muss abweichen', variant: 'text-bg-danger' }
   }
   if (difference > 0) return { text: `${difference} mehr als Karten`, variant: 'text-bg-secondary' }
   return { text: `${Math.abs(difference)} weniger als Karten`, variant: 'text-bg-secondary' }

@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import {
   BONUS_POINTS,
   DEFAULT_START_CARD_COUNT,
+  GameMode,
   MAX_CARDS_PER_ROUND,
   biddingOrder,
   bidsAreAllowed,
@@ -9,12 +10,47 @@ import {
   calculatePoints,
   dealerForRound,
   dealerIndexForRound,
+  describeMode,
   determineWinners,
   nextCardCount,
   pickRandomDealerIndex
 } from '../src/lib/rules.js'
 
-describe('calculatePoints', () => {
+describe('calculatePoints · Classic Wizard', () => {
+  const classic = (bid, tricksWon) => calculatePoints(bid, tricksWon, GameMode.CLASSIC)
+
+  it('gibt bei getroffener Ansage 20 Punkte plus 10 je Stich', () => {
+    expect(classic(0, 0)).toBe(20)
+    expect(classic(1, 1)).toBe(30)
+    expect(classic(3, 3)).toBe(50)
+    expect(classic(6, 6)).toBe(80)
+  })
+
+  it('zieht bei verfehlter Ansage 10 Punkte je Stich Abweichung ab', () => {
+    expect(classic(0, 1)).toBe(-10)
+    expect(classic(3, 1)).toBe(-20)
+    expect(classic(1, 4)).toBe(-30)
+    expect(classic(5, 0)).toBe(-50)
+  })
+
+  it('unterscheidet sich von der F&E Version', () => {
+    expect(calculatePoints(3, 3, GameMode.FE)).toBe(8)
+    expect(calculatePoints(3, 3, GameMode.CLASSIC)).toBe(50)
+    expect(calculatePoints(3, 1, GameMode.FE)).toBe(1)
+    expect(calculatePoints(3, 1, GameMode.CLASSIC)).toBe(-20)
+  })
+})
+
+describe('describeMode', () => {
+  it('findet beide Modi und fällt sonst auf die F&E Version zurück', () => {
+    expect(describeMode(GameMode.CLASSIC).name).toBe('Classic Wizard')
+    expect(describeMode(GameMode.FE).name).toBe('F&E Version')
+    expect(describeMode(undefined).id).toBe(GameMode.FE)
+    expect(describeMode('gibtsnicht').id).toBe(GameMode.FE)
+  })
+})
+
+describe('calculatePoints · F&E Version', () => {
   it('gibt bei getroffener Ansage 5 Bonuspunkte plus einen Punkt je Stich', () => {
     expect(BONUS_POINTS).toBe(5)
     expect(calculatePoints(0, 0)).toBe(5)
@@ -46,7 +82,7 @@ describe('calculatePoints', () => {
 })
 
 describe('bidsAreAllowed', () => {
-  it('verbietet Ansagen, die genau der Kartenanzahl entsprechen', () => {
+  it('verbietet in der F&E Version Ansagen genau in Höhe der Kartenanzahl', () => {
     expect(bidsAreAllowed(6, 6)).toBe(false)
     expect(bidsAreAllowed(1, 1)).toBe(false)
     expect(bidsAreAllowed(0, 0)).toBe(false)
@@ -57,6 +93,12 @@ describe('bidsAreAllowed', () => {
     expect(bidsAreAllowed(5, 6)).toBe(true)
     expect(bidsAreAllowed(0, 6)).toBe(true)
     expect(bidsAreAllowed(12, 6)).toBe(true)
+  })
+
+  it('kennt in Classic Wizard keine Einschränkung', () => {
+    expect(bidsAreAllowed(6, 6, GameMode.CLASSIC)).toBe(true)
+    expect(bidsAreAllowed(0, 0, GameMode.CLASSIC)).toBe(true)
+    expect(bidsAreAllowed(7, 6, GameMode.CLASSIC)).toBe(true)
   })
 })
 

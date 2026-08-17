@@ -7,7 +7,7 @@ import ScoreTable from './ScoreTable.vue'
 import { RoundPhase } from '../db/index.js'
 import { useGame } from '../store/gameStore.js'
 
-const { state, currentRound, finishedRounds, totals, standings, endGame } = useGame()
+const { state, modeInfo, currentRound, finishedRounds, totals, standings, endGame } = useGame()
 
 const showEndDialog = ref(false)
 
@@ -27,6 +27,7 @@ async function confirmEnd() {
       <div>
         <h1 class="h5 mb-0">{{ state.players.map((player) => player.name).join(' · ') }}</h1>
         <p class="mb-0 text-body-secondary small">
+          <span class="badge text-bg-secondary me-1">{{ modeInfo.name }}</span>
           <template v-if="leader">
             Führung: {{ leader.player.name }} ({{ leader.total }} Punkte)
           </template>

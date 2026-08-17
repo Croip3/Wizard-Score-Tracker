@@ -3,6 +3,7 @@ import { onMounted, ref } from 'vue'
 import ConfirmDialog from './ConfirmDialog.vue'
 import { GameStatus } from '../db/index.js'
 import { computePlayerStats, listGameSummaries } from '../db/repository.js'
+import { GAME_MODES, describeMode } from '../lib/rules.js'
 import { useGame } from '../store/gameStore.js'
 
 const { goTo, openGameSummary, removeGame } = useGame()
@@ -11,18 +12,28 @@ const summaries = ref([])
 const playerStats = ref([])
 const loading = ref(true)
 const gameToDelete = ref(null)
+// Punkte sind zwischen den Modi nicht vergleichbar, deshalb filterbar.
+const statsMode = ref(GAME_MODES[0].id)
 
 const dateFormat = new Intl.DateTimeFormat('de-DE', { dateStyle: 'medium', timeStyle: 'short' })
 
 async function load() {
   loading.value = true
   try {
-    const [games, stats] = await Promise.all([listGameSummaries(), computePlayerStats()])
+    const [games, stats] = await Promise.all([
+      listGameSummaries(),
+      computePlayerStats(statsMode.value)
+    ])
     summaries.value = games
     playerStats.value = stats
   } finally {
     loading.value = false
   }
+}
+
+async function selectMode(mode) {
+  statsMode.value = mode
+  playerStats.value = await computePlayerStats(mode)
 }
 
 onMounted(load)
@@ -61,8 +72,30 @@ async function confirmDelete() {
     <p v-if="loading" class="text-body-secondary">Lade Daten …</p>
 
     <template v-else>
+      <div
+        class="btn-group w-100 mb-3"
+        role="group"
+        aria-label="Spielmodus für die Spielerstatistik"
+      >
+        <button
+          v-for="gameMode in GAME_MODES"
+          :key="gameMode.id"
+          type="button"
+          class="btn"
+          :class="statsMode === gameMode.id ? 'btn-primary' : 'btn-outline-primary'"
+          @click="selectMode(gameMode.id)"
+        >
+          {{ gameMode.name }}
+        </button>
+      </div>
+
       <div v-if="playerStats.length" class="card mb-4">
-        <div class="card-header fw-semibold">Spieler (abgeschlossene Spiele)</div>
+        <div class="card-header fw-semibold">
+          Spieler · {{ describeMode(statsMode).name }}
+          <span class="d-block small fw-normal text-body-secondary">
+            nur abgeschlossene Spiele dieses Modus
+          </span>
+        </div>
         <div class="table-responsive">
           <table class="table table-sm table-striped score-table align-middle mb-0">
             <thead>
@@ -106,6 +139,7 @@ async function confirmDelete() {
                 >
                   {{ summary.game.status === GameStatus.RUNNING ? 'läuft' : 'beendet' }}
                 </span>
+                <span class="badge text-bg-light border">{{ describeMode(summary.mode).shortName }}</span>
               </div>
               <div class="small text-body-secondary">
                 {{ summary.players.map((player) => player.name).join(' · ') }}

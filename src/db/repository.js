@@ -1,4 +1,5 @@
 import { db, GameStatus, RoundPhase, toNameKey } from './index.js'
+import { GameMode } from '../lib/rules.js'
 
 /* ------------------------------------------------------------------ Spieler */
 
@@ -44,12 +45,14 @@ export async function listKnownPlayers() {
  *
  * @param {number[]} playerIds Spieler in Sitzreihenfolge
  * @param {number} firstDealerIndex Ausgeloster Geber der ersten Runde
+ * @param {string} mode Spielmodus (siehe GameMode in lib/rules.js)
  */
-export async function createGame(playerIds, firstDealerIndex = 0) {
+export async function createGame(playerIds, firstDealerIndex = 0, mode = GameMode.FE) {
   const game = {
     startedAt: new Date().toISOString(),
     endedAt: null,
     status: GameStatus.RUNNING,
+    mode,
     playerIds: [...playerIds],
     firstDealerIndex,
     winnerPlayerIds: []
@@ -225,6 +228,8 @@ export async function listGameSummaries() {
 
       return {
         game,
+        // Spiele aus früheren Versionen haben keinen Modus gespeichert.
+        mode: game.mode ?? GameMode.FE,
         players: game.playerIds.map((id) => playersById.get(id)).filter(Boolean),
         roundsPlayed: rounds.filter(
           (round) => round.gameId === game.id && round.phase === RoundPhase.DONE
@@ -239,10 +244,17 @@ export async function listGameSummaries() {
 
 /**
  * Spielerstatistik über alle abgeschlossenen Spiele hinweg.
+ *
+ * @param {string|null} mode Nur Spiele dieses Modus auswerten; `null` = alle.
+ *   Punkte sind zwischen den Modi nicht vergleichbar, deshalb lässt sich die
+ *   Auswertung filtern.
  */
-export async function computePlayerStats() {
+export async function computePlayerStats(mode = null) {
   const summaries = await listGameSummaries()
-  const finished = summaries.filter((summary) => summary.game.status === GameStatus.FINISHED)
+  const finished = summaries.filter(
+    (summary) =>
+      summary.game.status === GameStatus.FINISHED && (mode === null || summary.mode === mode)
+  )
 
   const stats = new Map()
   const statFor = (player) => {

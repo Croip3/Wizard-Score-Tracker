@@ -3,7 +3,7 @@ import { computed } from 'vue'
 import ScoreTable from './ScoreTable.vue'
 import { useGame } from '../store/gameStore.js'
 
-const { state, finishedRounds, totals, standings, winners, goTo, clearGame } = useGame()
+const { state, modeInfo, finishedRounds, totals, standings, winners, goTo, clearGame } = useGame()
 
 const medals = { 1: '🥇', 2: '🥈', 3: '🥉' }
 
@@ -55,6 +55,7 @@ function hitRateText(playerId) {
         <p class="text-body-secondary mb-0">
           {{ finishedRounds.length }} {{ roundsWord }} · gestartet am {{ startedAt }}
         </p>
+        <span class="badge text-bg-secondary mt-2">{{ modeInfo.name }}</span>
       </div>
     </div>
 

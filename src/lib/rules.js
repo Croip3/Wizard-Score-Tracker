@@ -1,20 +1,72 @@
 /**
- * Spielregeln für Wizard in der Hausvariante "Stiche Raten".
+ * Spielregeln für Wizard in zwei Spielmodi.
  *
- * Wertung (Standardvariante, nur der Bonus ist von 10 auf 5 abgeändert):
+ * "F&E Version" (Hausvariante, abgeleitet von Stiche-Raten):
  *   - Jeder gewonnene Stich zählt 1 Punkt.
  *   - Wer seine Ansage trifft, bekommt zusätzlich 5 Bonuspunkte.
- *   - Wer seine Ansage verfehlt, verliert nur den Bonus – Punktabzug gibt es
- *     nicht, der Punktestand kann also nie negativ werden.
+ *   - Wer verfehlt, verliert nur den Bonus – kein Punktabzug.
+ *   - Die Summe der Ansagen darf nicht der Kartenanzahl entsprechen.
  *
- * Die Bonuspunkte sind bewusst fest codiert – sie sind nicht konfigurierbar.
+ * "Classic Wizard" (offizielle Wertung):
+ *   - Ansage getroffen: 20 Punkte + 10 Punkte pro gewonnenem Stich.
+ *   - Ansage verfehlt: 10 Minuspunkte pro Stich Abweichung.
+ *   - Keine Einschränkung für die Summe der Ansagen.
+ *
+ * Die Punktwerte sind bewusst fest codiert – sie sind nicht konfigurierbar.
  */
+
+/** Verfügbare Spielmodi. */
+export const GameMode = Object.freeze({
+  FE: 'fe',
+  CLASSIC: 'classic'
+})
+
+/* --- F&E Version --- */
 
 /** Fester Bonus für eine korrekt angesagte Stichzahl. */
 export const BONUS_POINTS = 5
 
 /** Punkte pro gewonnenem Stich. */
 export const POINTS_PER_TRICK = 1
+
+/* --- Classic Wizard --- */
+
+/** Grundpunkte für eine korrekt angesagte Stichzahl. */
+export const CLASSIC_BONUS_POINTS = 20
+
+/** Punkte pro gewonnenem Stich bei getroffener Ansage. */
+export const CLASSIC_POINTS_PER_TRICK = 10
+
+/** Minuspunkte pro Stich Abweichung bei verfehlter Ansage. */
+export const CLASSIC_PENALTY_PER_TRICK = 10
+
+/** Beschreibung der Modi für die Anzeige. */
+export const GAME_MODES = [
+  {
+    id: GameMode.FE,
+    name: 'F&E Version',
+    shortName: 'F&E',
+    hitRule: `${BONUS_POINTS} Punkte + ${POINTS_PER_TRICK} je Stich`,
+    missRule: 'nur der Bonus entfällt, kein Abzug',
+    extraRule: 'Ansagen dürfen nicht genau die Kartenanzahl ergeben'
+  },
+  {
+    id: GameMode.CLASSIC,
+    name: 'Classic Wizard',
+    shortName: 'Classic',
+    hitRule: `${CLASSIC_BONUS_POINTS} Punkte + ${CLASSIC_POINTS_PER_TRICK} je Stich`,
+    missRule: `${CLASSIC_PENALTY_PER_TRICK} Minuspunkte je Stich Abweichung`,
+    extraRule: 'Ansagen sind frei – offizielle Wizard-Wertung'
+  }
+]
+
+/**
+ * Beschreibung eines Modus; unbekannte oder fehlende Werte (Spiele aus
+ * früheren Versionen) fallen auf die F&E Version zurück.
+ */
+export function describeMode(mode) {
+  return GAME_MODES.find((entry) => entry.id === mode) ?? GAME_MODES[0]
+}
 
 /** Maximale Anzahl Spieler pro Spiel. */
 export const MAX_PLAYERS = 6
@@ -43,14 +95,16 @@ export function nextCardCount(cardCount) {
 }
 
 /**
- * Die Summe aller Ansagen einer Runde darf nicht genau der Kartenanzahl
- * entsprechen – mindestens ein Spieler muss seine Ansage verfehlen.
- * Mehr oder weniger ist beides erlaubt.
+ * In der F&E Version darf die Summe aller Ansagen nicht genau der
+ * Kartenanzahl entsprechen – mindestens ein Spieler muss seine Ansage
+ * verfehlen. Classic Wizard kennt diese Einschränkung nicht.
  *
  * @param {number} bidTotal Summe aller Ansagen
  * @param {number} cardCount Karten in dieser Runde
+ * @param {string} mode Spielmodus
  */
-export function bidsAreAllowed(bidTotal, cardCount) {
+export function bidsAreAllowed(bidTotal, cardCount, mode = GameMode.FE) {
+  if (mode === GameMode.CLASSIC) return true
   return bidTotal !== cardCount
 }
 
@@ -59,9 +113,10 @@ export function bidsAreAllowed(bidTotal, cardCount) {
  *
  * @param {number} bid Angesagte Stiche
  * @param {number} tricksWon Tatsächlich gewonnene Stiche
- * @returns {number} Rundenpunkte (nie negativ)
+ * @param {string} mode Spielmodus
+ * @returns {number} Rundenpunkte (in Classic Wizard auch negativ)
  */
-export function calculatePoints(bid, tricksWon) {
+export function calculatePoints(bid, tricksWon, mode = GameMode.FE) {
   if (!Number.isInteger(bid) || !Number.isInteger(tricksWon)) {
     throw new TypeError('Ansage und Stiche müssen ganze Zahlen sein.')
   }
@@ -69,8 +124,16 @@ export function calculatePoints(bid, tricksWon) {
     throw new RangeError('Ansage und Stiche dürfen nicht negativ sein.')
   }
 
+  const hit = bid === tricksWon
+
+  if (mode === GameMode.CLASSIC) {
+    return hit
+      ? CLASSIC_BONUS_POINTS + tricksWon * CLASSIC_POINTS_PER_TRICK
+      : -Math.abs(bid - tricksWon) * CLASSIC_PENALTY_PER_TRICK
+  }
+
   const trickPoints = tricksWon * POINTS_PER_TRICK
-  return bid === tricksWon ? BONUS_POINTS + trickPoints : trickPoints
+  return hit ? BONUS_POINTS + trickPoints : trickPoints
 }
 
 /**

@@ -2,11 +2,13 @@ import { computed, reactive } from 'vue'
 import { GameStatus, RoundPhase } from '../db/index.js'
 import * as repo from '../db/repository.js'
 import {
+  GameMode,
   MAX_CARDS_PER_ROUND,
   bidsAreAllowed,
   buildStandings,
   calculatePoints,
   dealerForRound,
+  describeMode,
   determineWinners,
   nextCardCount,
   pickRandomDealerIndex
@@ -58,6 +60,11 @@ const totals = computed(() => {
 const standings = computed(() => buildStandings(state.players, totals.value))
 
 const winners = computed(() => determineWinners(state.players, totals.value))
+
+/** Modus des laufenden Spiels; ältere Spiele gelten als F&E Version. */
+const mode = computed(() => state.game?.mode ?? GameMode.FE)
+
+const modeInfo = computed(() => describeMode(mode.value))
 
 const currentDealer = computed(() => {
   if (!currentRound.value) return null
@@ -132,8 +139,9 @@ function goTo(view) {
  *
  * @param {string[]} names Spielernamen in Sitzreihenfolge
  * @param {number} firstRoundCardCount Karten in der ersten Runde
+ * @param {string} selectedMode Spielmodus
  */
-async function startGame(names, firstRoundCardCount) {
+async function startGame(names, firstRoundCardCount, selectedMode = GameMode.FE) {
   try {
     await closeRunningGames()
     const players = await repo.ensurePlayers(names)
@@ -141,7 +149,8 @@ async function startGame(names, firstRoundCardCount) {
     const firstDealerIndex = pickRandomDealerIndex(players.length)
     const game = await repo.createGame(
       players.map((player) => player.id),
-      firstDealerIndex
+      firstDealerIndex,
+      selectedMode
     )
     state.game = game
     state.players = players
@@ -275,7 +284,7 @@ async function resetAllTricks() {
 async function confirmBids() {
   const round = currentRound.value
   if (!round) return false
-  if (!bidsAreAllowed(bidTotal.value, round.cardCount)) {
+  if (!bidsAreAllowed(bidTotal.value, round.cardCount, mode.value)) {
     state.error = `Die Ansagen dürfen zusammen nicht genau ${round.cardCount} ergeben.`
     return false
   }
@@ -314,7 +323,7 @@ async function completeRound() {
 
   try {
     const updates = round.entries.map((entry) => {
-      entry.points = calculatePoints(entry.bid, entry.tricksWon)
+      entry.points = calculatePoints(entry.bid, entry.tricksWon, mode.value)
       return { id: entry.id, points: entry.points }
     })
     await repo.updateEntries(updates)
@@ -391,6 +400,8 @@ export function useGame() {
   return {
     state,
     // abgeleitete Werte
+    mode,
+    modeInfo,
     currentRound,
     currentDealer,
     finishedRounds,

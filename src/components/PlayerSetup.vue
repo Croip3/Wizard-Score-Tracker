@@ -4,6 +4,8 @@ import NumberStepper from './NumberStepper.vue'
 import { listKnownPlayers } from '../db/repository.js'
 import {
   DEFAULT_START_CARD_COUNT,
+  GAME_MODES,
+  GameMode,
   MAX_CARDS_PER_ROUND,
   MAX_PLAYERS,
   MIN_PLAYERS
@@ -18,6 +20,7 @@ const hint = ref('')
 const knownPlayers = ref([])
 const starting = ref(false)
 const startCards = ref(DEFAULT_START_CARD_COUNT)
+const selectedMode = ref(GameMode.FE)
 
 const isFull = computed(() => names.value.length >= MAX_PLAYERS)
 const canStart = computed(() => names.value.length >= MIN_PLAYERS && !starting.value)
@@ -65,7 +68,7 @@ async function onStart() {
   if (!canStart.value) return
   starting.value = true
   try {
-    await startGame(names.value, startCards.value)
+    await startGame(names.value, startCards.value, selectedMode.value)
   } finally {
     starting.value = false
   }
@@ -154,6 +157,35 @@ async function onStart() {
       </li>
     </ul>
     <p v-else class="empty-state">Noch keine Spieler eingetragen.</p>
+
+    <div class="card mb-3">
+      <div class="card-body">
+        <div class="form-label fw-semibold">Spielmodus</div>
+        <div class="list-group">
+          <label
+            v-for="gameMode in GAME_MODES"
+            :key="gameMode.id"
+            class="list-group-item d-flex gap-2"
+            :class="{ 'list-group-item-primary': selectedMode === gameMode.id }"
+          >
+            <input
+              v-model="selectedMode"
+              class="form-check-input flex-shrink-0 mt-1"
+              type="radio"
+              name="game-mode"
+              :value="gameMode.id"
+            />
+            <span>
+              <span class="fw-semibold">{{ gameMode.name }}</span>
+              <span class="d-block small">
+                Getroffen: {{ gameMode.hitRule }} · Verfehlt: {{ gameMode.missRule }}
+              </span>
+              <span class="d-block small opacity-75">{{ gameMode.extraRule }}</span>
+            </span>
+          </label>
+        </div>
+      </div>
+    </div>
 
     <div class="card mb-3">
       <div class="card-body">
