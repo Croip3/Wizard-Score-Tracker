@@ -8,7 +8,8 @@ import {
   GameMode,
   MAX_CARDS_PER_ROUND,
   MAX_PLAYERS,
-  MIN_PLAYERS
+  MIN_PLAYERS,
+  totalRounds
 } from '../lib/rules.js'
 import { useGame } from '../store/gameStore.js'
 
@@ -63,6 +64,11 @@ function move(index, delta) {
   const [name] = names.value.splice(index, 1)
   names.value.splice(target, 0, name)
 }
+
+/** In Amigo Wizard gibt die Regel die Rundenfolge vor. */
+const fixedRounds = computed(() =>
+  names.value.length >= MIN_PLAYERS ? totalRounds(selectedMode.value, names.value.length) : null
+)
 
 async function onStart() {
   if (!canStart.value) return
@@ -189,23 +195,37 @@ async function onStart() {
 
     <div class="card mb-3">
       <div class="card-body">
-        <label class="form-label fw-semibold" for="start-cards">Karten in Runde 1</label>
-        <div class="d-flex align-items-center gap-3" id="start-cards">
-          <NumberStepper
-            v-model="startCards"
-            :min="1"
-            :max="MAX_CARDS_PER_ROUND"
-            large
-            label="Karten in Runde 1"
-            variant="outline-primary"
-          />
-          <span class="text-body-secondary">
-            {{ startCards === 1 ? 'Karte' : 'Karten' }} pro Spieler
-          </span>
-        </div>
-        <div class="form-text">
-          Ab Runde 2 wird jeweils eine Karte weniger vorgeschlagen – in jeder Runde anpassbar.
-        </div>
+        <template v-if="selectedMode === GameMode.AMIGO">
+          <div class="form-label fw-semibold">Rundenfolge</div>
+          <p class="mb-0 text-body-secondary small">
+            Amigo Wizard gibt die Kartenanzahl vor: Runde 1 mit einer Karte, danach je eine mehr.
+            <template v-if="fixedRounds">
+              Bei {{ names.length }} Spielern sind das <strong>{{ fixedRounds }} Runden</strong>,
+              die letzte mit {{ fixedRounds }} Karten. Danach ist das Spiel zu Ende.
+            </template>
+            <template v-else>Die Rundenzahl ergibt sich aus der Spieleranzahl.</template>
+          </p>
+        </template>
+
+        <template v-else>
+          <label class="form-label fw-semibold" for="start-cards">Karten in Runde 1</label>
+          <div class="d-flex align-items-center gap-3" id="start-cards">
+            <NumberStepper
+              v-model="startCards"
+              :min="1"
+              :max="MAX_CARDS_PER_ROUND"
+              large
+              label="Karten in Runde 1"
+              variant="outline-primary"
+            />
+            <span class="text-body-secondary">
+              {{ startCards === 1 ? 'Karte' : 'Karten' }} pro Spieler
+            </span>
+          </div>
+          <div class="form-text">
+            Ab Runde 2 wird jeweils eine Karte weniger vorgeschlagen – in jeder Runde anpassbar.
+          </div>
+        </template>
       </div>
     </div>
 

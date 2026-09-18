@@ -60,7 +60,7 @@ function confirmNewGame() {
 
     <div class="card mb-3">
       <div class="card-body">
-        <h2 class="h6 card-title">Zwei Spielmodi</h2>
+        <h2 class="h6 card-title">Spielmodi</h2>
         <dl class="mb-0 text-body-secondary">
           <template v-for="gameMode in GAME_MODES" :key="gameMode.id">
             <dt class="text-body">{{ gameMode.name }}</dt>

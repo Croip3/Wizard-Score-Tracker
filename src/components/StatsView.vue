@@ -85,7 +85,7 @@ async function confirmDelete() {
           :class="statsMode === gameMode.id ? 'btn-primary' : 'btn-outline-primary'"
           @click="selectMode(gameMode.id)"
         >
-          {{ gameMode.name }}
+          {{ gameMode.shortName }}
         </button>
       </div>
 

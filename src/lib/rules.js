@@ -1,5 +1,5 @@
 /**
- * Spielregeln für Wizard in zwei Spielmodi.
+ * Spielregeln für Wizard in drei Spielmodi.
  *
  * "F&E Version" (Hausvariante, abgeleitet von Stiche-Raten):
  *   - Jeder gewonnene Stich zählt 1 Punkt.
@@ -7,10 +7,16 @@
  *   - Wer verfehlt, verliert nur den Bonus – kein Punktabzug.
  *   - Die Summe der Ansagen darf nicht der Kartenanzahl entsprechen.
  *
- * "Classic Wizard" (offizielle Wertung):
+ * "Classic Wizard" (offizielle Wertung, freie Rundenfolge):
  *   - Ansage getroffen: 20 Punkte + 10 Punkte pro gewonnenem Stich.
  *   - Ansage verfehlt: 10 Minuspunkte pro Stich Abweichung.
  *   - Keine Einschränkung für die Summe der Ansagen.
+ *
+ * "Amigo Wizard" (offizielle Regeln der Amigo-Ausgabe):
+ *   - Wertung wie Classic Wizard.
+ *   - Runde 1 wird mit einer Karte gespielt, danach je eine Karte mehr.
+ *   - Das Deck hat 60 Karten, gespielt werden 60 ÷ Spieleranzahl Runden;
+ *     danach ist das Spiel zu Ende.
  *
  * Die Punktwerte sind bewusst fest codiert – sie sind nicht konfigurierbar.
  */
@@ -18,7 +24,8 @@
 /** Verfügbare Spielmodi. */
 export const GameMode = Object.freeze({
   FE: 'fe',
-  CLASSIC: 'classic'
+  CLASSIC: 'classic',
+  AMIGO: 'amigo'
 })
 
 /* --- F&E Version --- */
@@ -29,7 +36,7 @@ export const BONUS_POINTS = 5
 /** Punkte pro gewonnenem Stich. */
 export const POINTS_PER_TRICK = 1
 
-/* --- Classic Wizard --- */
+/* --- Classic Wizard und Amigo Wizard --- */
 
 /** Grundpunkte für eine korrekt angesagte Stichzahl. */
 export const CLASSIC_BONUS_POINTS = 20
@@ -39,6 +46,9 @@ export const CLASSIC_POINTS_PER_TRICK = 10
 
 /** Minuspunkte pro Stich Abweichung bei verfehlter Ansage. */
 export const CLASSIC_PENALTY_PER_TRICK = 10
+
+/** Kartenanzahl eines Wizard-Decks (52 Zahlenkarten, 4 Zauberer, 4 Narren). */
+export const DECK_SIZE = 60
 
 /** Beschreibung der Modi für die Anzeige. */
 export const GAME_MODES = [
@@ -56,7 +66,15 @@ export const GAME_MODES = [
     shortName: 'Classic',
     hitRule: `${CLASSIC_BONUS_POINTS} Punkte + ${CLASSIC_POINTS_PER_TRICK} je Stich`,
     missRule: `${CLASSIC_PENALTY_PER_TRICK} Minuspunkte je Stich Abweichung`,
-    extraRule: 'Ansagen sind frei – offizielle Wizard-Wertung'
+    extraRule: 'Ansagen sind frei, Kartenanzahl wie in der F&E Version wählbar'
+  },
+  {
+    id: GameMode.AMIGO,
+    name: 'Amigo Wizard',
+    shortName: 'Amigo',
+    hitRule: `${CLASSIC_BONUS_POINTS} Punkte + ${CLASSIC_POINTS_PER_TRICK} je Stich`,
+    missRule: `${CLASSIC_PENALTY_PER_TRICK} Minuspunkte je Stich Abweichung`,
+    extraRule: `Offizielle Rundenfolge: ab 1 Karte aufsteigend, ${DECK_SIZE} ÷ Spieler Runden`
   }
 ]
 
@@ -66,6 +84,27 @@ export const GAME_MODES = [
  */
 export function describeMode(mode) {
   return GAME_MODES.find((entry) => entry.id === mode) ?? GAME_MODES[0]
+}
+
+/** Modi, die nach der offiziellen Wizard-Wertung rechnen. */
+function usesClassicScoring(mode) {
+  return mode === GameMode.CLASSIC || mode === GameMode.AMIGO
+}
+
+/**
+ * Anzahl der Runden eines Spiels.
+ *
+ * @param {string} mode Spielmodus
+ * @param {number} playerCount Anzahl Spieler
+ * @returns {number|null} Feste Rundenzahl, oder `null` wenn das Spiel läuft,
+ *   bis es von Hand beendet wird.
+ */
+export function totalRounds(mode, playerCount) {
+  if (mode !== GameMode.AMIGO) return null
+  if (!Number.isInteger(playerCount) || playerCount < 1) {
+    throw new RangeError('Es muss mindestens einen Spieler geben.')
+  }
+  return Math.max(Math.floor(DECK_SIZE / playerCount), 1)
 }
 
 /** Maximale Anzahl Spieler pro Spiel. */
@@ -80,31 +119,45 @@ export const MAX_CARDS_PER_ROUND = 30
 /**
  * Karten pro Spieler in der ersten Runde. Von hier wird Runde für Runde
  * heruntergezählt; der Wert lässt sich beim Spielstart und in jeder Runde
- * von Hand anpassen.
+ * von Hand anpassen. In Amigo Wizard beginnt jedes Spiel mit einer Karte.
  */
 export const DEFAULT_START_CARD_COUNT = 6
 
 /**
- * Kartenanzahl der Folgerunde: eine Karte weniger als in der Vorrunde,
- * mindestens aber eine.
+ * Kartenanzahl der ersten Runde.
+ *
+ * @param {string} mode Spielmodus
+ * @param {number} chosenCardCount Im Setup gewählter Wert (außer bei Amigo)
+ */
+export function firstCardCount(mode, chosenCardCount = DEFAULT_START_CARD_COUNT) {
+  return mode === GameMode.AMIGO ? 1 : chosenCardCount
+}
+
+/**
+ * Kartenanzahl der Folgerunde: in Amigo Wizard eine Karte mehr als in der
+ * Vorrunde, sonst eine weniger (mindestens aber eine).
  *
  * @param {number} cardCount Kartenanzahl der abgeschlossenen Runde
+ * @param {string} mode Spielmodus
  */
-export function nextCardCount(cardCount) {
+export function nextCardCount(cardCount, mode = GameMode.FE) {
+  if (mode === GameMode.AMIGO) {
+    return Math.min(cardCount + 1, MAX_CARDS_PER_ROUND)
+  }
   return Math.max(cardCount - 1, 1)
 }
 
 /**
- * In der F&E Version darf die Summe aller Ansagen nicht genau der
+ * Nur in der F&E Version darf die Summe aller Ansagen nicht genau der
  * Kartenanzahl entsprechen – mindestens ein Spieler muss seine Ansage
- * verfehlen. Classic Wizard kennt diese Einschränkung nicht.
+ * verfehlen. Die Wizard-Modi kennen diese Einschränkung nicht.
  *
  * @param {number} bidTotal Summe aller Ansagen
  * @param {number} cardCount Karten in dieser Runde
  * @param {string} mode Spielmodus
  */
 export function bidsAreAllowed(bidTotal, cardCount, mode = GameMode.FE) {
-  if (mode === GameMode.CLASSIC) return true
+  if (usesClassicScoring(mode)) return true
   return bidTotal !== cardCount
 }
 
@@ -114,7 +167,7 @@ export function bidsAreAllowed(bidTotal, cardCount, mode = GameMode.FE) {
  * @param {number} bid Angesagte Stiche
  * @param {number} tricksWon Tatsächlich gewonnene Stiche
  * @param {string} mode Spielmodus
- * @returns {number} Rundenpunkte (in Classic Wizard auch negativ)
+ * @returns {number} Rundenpunkte (in den Wizard-Modi auch negativ)
  */
 export function calculatePoints(bid, tricksWon, mode = GameMode.FE) {
   if (!Number.isInteger(bid) || !Number.isInteger(tricksWon)) {
@@ -126,7 +179,7 @@ export function calculatePoints(bid, tricksWon, mode = GameMode.FE) {
 
   const hit = bid === tricksWon
 
-  if (mode === GameMode.CLASSIC) {
+  if (usesClassicScoring(mode)) {
     return hit
       ? CLASSIC_BONUS_POINTS + tricksWon * CLASSIC_POINTS_PER_TRICK
       : -Math.abs(bid - tricksWon) * CLASSIC_PENALTY_PER_TRICK

@@ -10,8 +10,10 @@ import {
   dealerForRound,
   describeMode,
   determineWinners,
+  firstCardCount,
   nextCardCount,
-  pickRandomDealerIndex
+  pickRandomDealerIndex,
+  totalRounds
 } from '../lib/rules.js'
 
 /**
@@ -65,6 +67,11 @@ const winners = computed(() => determineWinners(state.players, totals.value))
 const mode = computed(() => state.game?.mode ?? GameMode.FE)
 
 const modeInfo = computed(() => describeMode(mode.value))
+
+/** Feste Rundenzahl des Modus, oder null wenn das Spiel offen läuft. */
+const roundLimit = computed(() =>
+  state.players.length > 0 ? totalRounds(mode.value, state.players.length) : null
+)
 
 const currentDealer = computed(() => {
   if (!currentRound.value) return null
@@ -156,7 +163,10 @@ async function startGame(names, firstRoundCardCount, selectedMode = GameMode.FE)
     state.players = players
     state.rounds = []
     state.runningGameId = game.id
-    await addRound(1, clamp(Math.round(firstRoundCardCount), 1, MAX_CARDS_PER_ROUND))
+    await addRound(
+      1,
+      clamp(Math.round(firstCardCount(selectedMode, firstRoundCardCount)), 1, MAX_CARDS_PER_ROUND)
+    )
     goTo('game')
   } catch (error) {
     reportError(error)
@@ -333,8 +343,15 @@ async function completeRound() {
     round.completedAt = completedAt
     await repo.updateRound(round.id, { phase: RoundPhase.DONE, completedAt })
 
-    // Es wird heruntergezählt: eine Karte weniger als in der Vorrunde.
-    await addRound(round.roundNumber + 1, nextCardCount(round.cardCount))
+    // In Amigo Wizard endet das Spiel nach der letzten regulären Runde.
+    if (roundLimit.value !== null && round.roundNumber >= roundLimit.value) {
+      state.error = null
+      await endGame()
+      return true
+    }
+
+    // Kartenanzahl der Folgerunde: aufsteigend in Amigo Wizard, sonst abwärts.
+    await addRound(round.roundNumber + 1, nextCardCount(round.cardCount, mode.value))
     state.error = null
     return true
   } catch (error) {
@@ -402,6 +419,7 @@ export function useGame() {
     // abgeleitete Werte
     mode,
     modeInfo,
+    roundLimit,
     currentRound,
     currentDealer,
     finishedRounds,

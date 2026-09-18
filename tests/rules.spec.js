@@ -12,8 +12,10 @@ import {
   dealerIndexForRound,
   describeMode,
   determineWinners,
+  firstCardCount,
   nextCardCount,
-  pickRandomDealerIndex
+  pickRandomDealerIndex,
+  totalRounds
 } from '../src/lib/rules.js'
 
 describe('calculatePoints · Classic Wizard', () => {
@@ -38,6 +40,58 @@ describe('calculatePoints · Classic Wizard', () => {
     expect(calculatePoints(3, 3, GameMode.CLASSIC)).toBe(50)
     expect(calculatePoints(3, 1, GameMode.FE)).toBe(1)
     expect(calculatePoints(3, 1, GameMode.CLASSIC)).toBe(-20)
+  })
+})
+
+describe('Amigo Wizard', () => {
+  it('rechnet wie Classic Wizard', () => {
+    for (const bid of [0, 1, 3, 6]) {
+      for (const tricks of [0, 1, 3, 6]) {
+        expect(calculatePoints(bid, tricks, GameMode.AMIGO)).toBe(
+          calculatePoints(bid, tricks, GameMode.CLASSIC)
+        )
+      }
+    }
+    expect(calculatePoints(3, 3, GameMode.AMIGO)).toBe(50)
+    expect(calculatePoints(3, 1, GameMode.AMIGO)).toBe(-20)
+  })
+
+  it('kennt keine Zwangsverfehlung', () => {
+    expect(bidsAreAllowed(6, 6, GameMode.AMIGO)).toBe(true)
+  })
+
+  it('spielt 60 ÷ Spieleranzahl Runden', () => {
+    expect(totalRounds(GameMode.AMIGO, 3)).toBe(20)
+    expect(totalRounds(GameMode.AMIGO, 4)).toBe(15)
+    expect(totalRounds(GameMode.AMIGO, 5)).toBe(12)
+    expect(totalRounds(GameMode.AMIGO, 6)).toBe(10)
+  })
+
+  it('lässt die anderen Modi offen laufen', () => {
+    expect(totalRounds(GameMode.FE, 4)).toBeNull()
+    expect(totalRounds(GameMode.CLASSIC, 4)).toBeNull()
+  })
+
+  it('startet mit einer Karte und zählt aufwärts', () => {
+    expect(firstCardCount(GameMode.AMIGO, 6)).toBe(1)
+    expect(firstCardCount(GameMode.CLASSIC, 6)).toBe(6)
+    expect(firstCardCount(GameMode.FE, 9)).toBe(9)
+
+    expect(nextCardCount(1, GameMode.AMIGO)).toBe(2)
+    expect(nextCardCount(9, GameMode.AMIGO)).toBe(10)
+    expect(nextCardCount(MAX_CARDS_PER_ROUND, GameMode.AMIGO)).toBe(MAX_CARDS_PER_ROUND)
+  })
+
+  it('ergibt die offizielle Rundenfolge für vier Spieler', () => {
+    const rounds = totalRounds(GameMode.AMIGO, 4)
+    const counts = [firstCardCount(GameMode.AMIGO)]
+    for (let round = 1; round < rounds; round++) {
+      counts.push(nextCardCount(counts.at(-1), GameMode.AMIGO))
+    }
+    expect(counts).toHaveLength(15)
+    expect(counts[0]).toBe(1)
+    expect(counts.at(-1)).toBe(15)
+    expect(counts.reduce((sum, count) => sum + count * 4, 0)).toBe(480)
   })
 })
 

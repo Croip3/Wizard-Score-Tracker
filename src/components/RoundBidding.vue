@@ -4,7 +4,7 @@ import NumberStepper from './NumberStepper.vue'
 import { MAX_CARDS_PER_ROUND, biddingOrder, bidsAreAllowed } from '../lib/rules.js'
 import { useGame } from '../store/gameStore.js'
 
-const { state, mode, currentRound, currentDealer, bidTotal, setCardCount, setBid, confirmBids } =
+const { state, mode, roundLimit, currentRound, currentDealer, bidTotal, setCardCount, setBid, confirmBids } =
   useGame()
 
 /** Angesagt wird links vom Geber – der Geber ist zuletzt dran. */
@@ -46,7 +46,10 @@ const bidSummary = computed(() => {
       <div class="card-body">
         <div class="d-flex justify-content-between align-items-start gap-2 mb-3">
           <div>
-            <h2 class="h5 mb-1">Runde {{ currentRound.roundNumber }} · Ansagen</h2>
+            <h2 class="h5 mb-1">
+              Runde {{ currentRound.roundNumber }}<template v-if="roundLimit"> von {{ roundLimit }}</template>
+              · Ansagen
+            </h2>
             <p class="mb-0 text-body-secondary">
               Geber: <strong>{{ currentDealer?.name ?? '–' }}</strong>
               <span v-if="currentRound.roundNumber === 1" class="badge text-bg-secondary ms-1">

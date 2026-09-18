@@ -6,10 +6,10 @@ Mobile-first, komplett clientseitig, offline nutzbar – kein Backend, kein Kont
 ## Funktionen
 
 - **Spielerverwaltung**: 2–6 Spieler, freie Namen, Sitzreihenfolge per ↑/↓ anpassbar, Schnellauswahl bereits bekannter Spieler
-- **Rundenablauf**: Runde 1 startet mit 6 Karten pro Spieler (beim Spielstart per Stepper änderbar) und zählt danach je Runde um eine Karte herunter – in jeder Runde frei anpassbar (auch wieder hoch oder von vorn), Ansage-Phase und Stich-Phase getrennt
+- **Rundenablauf**: in F&E und Classic startet Runde 1 mit 6 Karten pro Spieler (beim Spielstart per Stepper änderbar) und zählt danach je Runde um eine Karte herunter; in Amigo Wizard beginnt Runde 1 mit einer Karte und zählt aufwärts. Die Kartenzahl bleibt in jeder Runde frei anpassbar, Ansage-Phase und Stich-Phase sind getrennt
 - **Dealer-Rotation**: wer die erste Runde austeilt, wird beim Spielstart zufällig ausgelost; danach wandert der Geber automatisch reihum. Angesagt wird links vom Geber, der Geber ist zuletzt dran
 - **Schnelle Eingabe**: alle Zahlen über +/− Stepper, keine Tastatur nötig; Stiche zusätzlich per Reset-Button (einzeln oder für alle) auf 0
-- **Zwei Spielmodi**: „F&E Version" (Hausvariante) und „Classic Wizard" (offizielle Wertung), beim Spielstart wählbar – siehe [Spielmodi und Punktewertung](#spielmodi-und-punktewertung)
+- **Drei Spielmodi**: „F&E Version" (Hausvariante), „Classic Wizard" (offizielle Wertung) und „Amigo Wizard" (offizielle Wertung samt Rundenstruktur), beim Spielstart wählbar – siehe [Spielmodi und Punktewertung](#spielmodi-und-punktewertung)
 - **Zwangsverfehlung** (nur F&E Version): die Summe der Ansagen darf nicht genau der Kartenanzahl entsprechen – mindestens ein Spieler muss danebenliegen. Passt es genau, wird die Anzeige rot und der Wechsel in die Stich-Phase ist gesperrt
 - **Sinnvolle Grenzen**: Ansage und Stiche liegen je Spieler immer zwischen 0 und der Kartenanzahl der Runde. Die Summe der Stiche darf dagegen von der Kartenanzahl abweichen (mehr oder weniger) – die App zeigt die Abweichung nur als Hinweis an und blockiert den Rundenabschluss nicht
 - **Punkteübersicht**: Tabelle mit einer Zeile pro Runde und einer Spalte pro Spieler, inklusive Gesamtstand und Platzierung
@@ -43,6 +43,19 @@ Punkte werden nie abgezogen, der Punktestand kann also nicht sinken. Zusätzlich
 Beispiele: 3/3 Stiche → `50` · 0/0 → `20` · Ansage 1 bei 4 Stichen → `−30` · Ansage 3 bei 1 Stich → `−20`.
 Negative Punktestände sind hier möglich. Ansagen sind frei – die Zwangsverfehlung gilt in diesem
 Modus **nicht**.
+
+### Amigo Wizard (offizielle Regeln)
+
+Wertung wie Classic Wizard, zusätzlich die vorgegebene Rundenstruktur der Amigo-Ausgabe:
+
+- Runde 1 wird mit **einer Karte** gespielt, danach kommt je Runde eine Karte dazu
+- Das Deck hat 60 Karten, gespielt werden **60 ÷ Spieleranzahl** Runden: 20 bei drei, 15 bei vier,
+  12 bei fünf, 10 bei sechs Spielern
+- Nach der letzten Runde endet das Spiel automatisch und die Auswertung erscheint
+- Die Kartenanzahl wird nicht im Setup abgefragt, lässt sich in der Runde aber weiterhin korrigieren
+
+Nicht abgebildet (bewusst, wie im restlichen Tracker): Trumpffarbe, Kartenwerte und die Regel,
+dass die Summe der Stiche der Kartenanzahl entsprechen muss.
 
 Alle Punktwerte sind bewusst fest im Code hinterlegt (`src/lib/rules.js`) und nicht konfigurierbar.
 Trumpffarben werden in keinem Modus erfasst. In der Statistik lassen sich die Spielerwerte pro
@@ -100,7 +113,7 @@ src/
 | Tabelle | Felder |
 | --- | --- |
 | `players` | `id`, `name`, `nameKey` (eindeutig, für Wiedererkennung), `createdAt` |
-| `games` | `id`, `startedAt`, `endedAt`, `status` (`running`/`finished`), `mode` (`fe`/`classic`), `playerIds`, `firstDealerIndex`, `winnerPlayerIds` |
+| `games` | `id`, `startedAt`, `endedAt`, `status` (`running`/`finished`), `mode` (`fe`/`classic`/`amigo`), `playerIds`, `firstDealerIndex`, `winnerPlayerIds` |
 | `rounds` | `id`, `gameId`, `roundNumber`, `cardCount`, `dealerPlayerId`, `phase`, `completedAt` |
 | `roundEntries` | `id`, `roundId`, `gameId`, `playerId`, `bid`, `tricksWon`, `points` |
 

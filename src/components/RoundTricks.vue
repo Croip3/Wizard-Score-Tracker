@@ -7,6 +7,7 @@ import { useGame } from '../store/gameStore.js'
 const {
   state,
   mode,
+  roundLimit,
   currentRound,
   currentDealer,
   trickTotal,
@@ -33,6 +34,11 @@ const entries = computed(() => {
 
 const matchesCardCount = computed(() => tricksRemaining.value === 0)
 
+/** Nach der letzten Runde eines Modus mit fester Rundenzahl endet das Spiel. */
+const isFinalRound = computed(
+  () => roundLimit.value !== null && currentRound.value?.roundNumber === roundLimit.value
+)
+
 const tricksWord = (count) => (Math.abs(count) === 1 ? 'Stich' : 'Stiche')
 
 /** Reiner Hinweis – die Summe darf von der Kartenanzahl abweichen. */
@@ -50,7 +56,10 @@ const remainderText = computed(() => {
       <div class="card-body">
         <div class="d-flex justify-content-between align-items-start gap-2">
           <div>
-            <h2 class="h5 mb-1">Runde {{ currentRound.roundNumber }} · Stiche</h2>
+            <h2 class="h5 mb-1">
+              Runde {{ currentRound.roundNumber }}<template v-if="roundLimit"> von {{ roundLimit }}</template>
+              · Stiche
+            </h2>
             <p class="mb-0 text-body-secondary">
               {{ currentRound.cardCount }} Karten · Geber: <strong>{{ currentDealer?.name ?? '–' }}</strong>
             </p>
@@ -120,7 +129,7 @@ const remainderText = computed(() => {
           Ansagen
         </button>
         <button type="button" class="btn btn-success btn-lg flex-grow-1" @click="completeRound">
-          Runde abschließen
+          {{ isFinalRound ? 'Letzte Runde abschließen' : 'Runde abschließen' }}
         </button>
       </div>
     </div>
